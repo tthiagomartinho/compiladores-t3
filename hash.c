@@ -55,7 +55,7 @@ Lista* buscaVariavel(Lista** l, char nome[], int escopo) {
     chave = chave % TAM;
     for (p = l[chave]; p != NULL; p = p->prox) {
         Variavel *v = (Variavel*) p->info;
-        if ( v->escopo == escopo) {
+        if (strcmp(v->nome, nome) == 0 && v->escopo == escopo) {
             return p;
         }
     }
@@ -103,7 +103,7 @@ Lista** insereVariavel(Lista** tabelaHash, char* nome, void* valor, int tipo, in
 Variavel* novaVariavel(char* nome, void* valor, int tipo, int escopo) {
     Variavel* v = (Variavel*) malloc(sizeof (Variavel));
     v -> nome = (char*) malloc((strlen(nome) + 1) * sizeof (char));
-    strcmp(v->nome, nome);
+    strcpy(v->nome, nome);
     if (tipo == 2) {
         v -> valor = (char*) malloc(strlen((char*) valor + 1) * sizeof (char));
         strcpy(v -> valor, (char*) valor);
