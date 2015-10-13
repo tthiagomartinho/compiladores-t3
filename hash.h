@@ -10,4 +10,8 @@ typedef struct variavel Variavel;
 Lista* inicializa (void);
 Lista** inicializa_hash (void);
 int vazia (Lista* l);
-void libera(List* l);
+void libera(Lista** l);
+
+Lista* buscaVariavel(Lista** l, char nome[], int escopo);
+Lista** insereVariavel(Lista** tabelaHash, char* nome, void* valor, int tipo, int escopo);
+Variavel* novaVariavel(char* nome, void* valor, int tipo, int escopo);
