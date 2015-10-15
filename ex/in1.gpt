@@ -1,0 +1,12 @@
+algoritmo teste1;
+
+variaveis
+	a, b, c, d, v , f: inteiro;
+	b : real;
+	c : literal;
+	d : logico;
+fim-variaveis
+
+inicio
+
+fim

@@ -5,8 +5,8 @@
 struct variavel {
     char *nome;
     void *valor;
-    int tipo; //inteiro=0, caracter=1, string=2, real=3, booleano =4
-    int escopo; //local=0, global=1
+    int tipo; //real = 0, inteiro = 1, caractere = 2, literal = 3, logico = 4, matriz = 5
+    int escopo; //global=1, local=1
     int usada;
 };
 
@@ -25,6 +25,13 @@ struct lista {
 
 Lista* inicializa(void) {
     return NULL;
+}
+
+Lista* criaNovoNoLista(void* info, Lista* prox) {
+    Lista* l = (Lista*)malloc(sizeof(Lista));
+    l->info = info;
+    l->prox = prox;
+    return l;
 }
 
 Lista** inicializa_hash() {
@@ -83,6 +90,7 @@ Lista** insereVariavel(Lista** tabelaHash, char* nome, void* valor, int tipo, in
     if (buscaVariavel(tabelaHash, nome, escopo) != NULL) {
         //JA EXISTE
         //O QUE FAZER?
+        printf("VALOR %s JA EXISTE \n", nome);
     } else {
         Variavel* variavel = novaVariavel(nome, valor, tipo, escopo);
         int chave = 0, i;
@@ -95,9 +103,8 @@ Lista** insereVariavel(Lista** tabelaHash, char* nome, void* valor, int tipo, in
 
         lista -> prox = tabelaHash[chave];
         tabelaHash[chave] = lista;
-
-        return tabelaHash;
     }
+    return tabelaHash;
 }
 
 Variavel* novaVariavel(char* nome, void* valor, int tipo, int escopo) {
@@ -115,18 +122,65 @@ Variavel* novaVariavel(char* nome, void* valor, int tipo, int escopo) {
     return v;
 }
 
-void libera(Lista** tabelaHash) {
+void imprimeHash(Lista** tabelaHash){
     int i;
     for(i = 0; i < TAM; i++){
         if(tabelaHash[i] != NULL){
             Lista* l;
             Lista* aux;
-            for(l = tabelaHash[i]; l -> prox != NULL; l = l->prox){
-                aux = l -> prox;
-                free(l->info);
-                free(l);
-                l = aux;
+            for(l = tabelaHash[i]; l != NULL; l = l->prox){
+                Variavel* v = (Variavel*)l->info;
+                printf("Nome: %s\n", v-> nome);
+                printf("valor: %p\n", v-> valor);
+                printf("tipo: %d\n", v-> tipo);
+                printf("escopo: %d\n", v-> escopo);
+                printf("usada: %d\n", v-> usada);
+                printf("\n");
             }
         }
     }
+}
+
+Lista** insereListaVariaveisHash(Lista** tabelaHash, Lista* variaveis, int tipo, int escopo){
+    Lista* l;
+    for(l = variaveis; l != NULL; l = l ->prox){
+        Variavel* v = (Variavel*) l->info;
+        tabelaHash = insereVariavel(tabelaHash, v->nome, NULL, tipo, escopo);
+    }
+    return tabelaHash;
+
+}
+
+void libera(Lista** tabelaHash) {
+    int i;
+    for(i = 0; i < TAM; i++){
+        if(tabelaHash[i] != NULL){
+            liberaLista(tabelaHash[i]);
+        }
+    }
+}
+
+Lista* liberaLista(Lista* lista){
+    Lista* l;
+    Lista* aux;
+    for(l = lista; l != NULL; l = l->prox){
+        aux = l -> prox;
+        Variavel* v = (Variavel*) l->info;
+        liberaVariavel(v);
+        free(l);
+        //l = aux;
+    }
+   l = NULL;
+}
+
+Variavel* liberaVariavel(Variavel* v){
+    free(v->nome);
+    if(v->valor != NULL){
+        free(v->valor);
+    }
+    free(v);
+
+}
+Funcao* liberaFuncao(Funcao* f){
+
 }
