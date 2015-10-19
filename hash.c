@@ -1,13 +1,6 @@
 #include "hash.h"
 
 #define TAM 97
-#define TIPO_VOID -1
-#define TIPO_REAL 0 
-#define TIPO_INTEIRO 1 
-#define TIPO_CARACTERE 2 
-#define TIPO_LITERAL 3 
-#define TIPO_LOGICO 4 
-#define TIPO_MATRIZ 5 
 
 struct variavel {
     char *nome;
@@ -21,7 +14,7 @@ struct variavel {
 
 struct funcao {
     char *nome;
-    int retorno; // inteiro=0, caracter=1, string=2, real=3, booleano =4, void = -1
+    int retorno; //real = 0, inteiro = 1, caractere = 2, literal = 3, logico = 4, void = -1
     int aridade;
     int escopo;
     int tipo_parametros[10]; //cada funcao pode ter no maximo 10 parametros
@@ -29,7 +22,7 @@ struct funcao {
 
 struct lista {
     void *info;
-    int tipo; //0 = variavel, 1 = funcao, 2 = char*
+    int tipo; //real = 0, inteiro = 1, caractere = 2, literal = 3, logico = 4, void = -1, variavel = 6, funcao = 7
     struct lista *prox;
 };
 
@@ -42,7 +35,7 @@ Lista* inicializarLista(void) {
 Lista* criarNovoNoLista(int tipo, void* info, Lista* prox) {
     Lista* l = (Lista*) malloc(sizeof (Lista));
     l->tipo = tipo;
-    if (tipo == TIPO_LISTA_CHAR) {
+    if (tipo == TIPO_LITERAL) {
         l->info = (char*) malloc((strlen(info) + 1) * sizeof (char));
         strcpy(l->info, info);
     } else {
@@ -56,7 +49,7 @@ Lista* criarNovoNoLista(int tipo, void* info, Lista* prox) {
 Lista* criarNovoNoListaFim(int tipo, void* info, Lista* primeiro) {
     Lista* l = (Lista*) malloc(sizeof (Lista));
     l->tipo = tipo;
-    if (tipo == TIPO_LISTA_CHAR) {
+    if (tipo == TIPO_LITERAL) {
         l->info = (char*) malloc((strlen(info) + 1) * sizeof (char));
         strcpy(l->info, info);
     } else {
@@ -83,19 +76,19 @@ Lista* liberarMemoriaLista(Lista* lista) {
     for (l = lista; l != NULL;) {
         aux = l -> prox;
         switch (l->tipo) {
-            case TIPO_LISTA_VARIAVEL:
+            case TIPO_VARIAVEL:
             {
                 Variavel* v = (Variavel*) l->info;
                 liberarMemoriaVariavel(v);
                 break;
             }
-            case TIPO_LISTA_FUNCAO:
+            case TIPO_FUNCAO:
             {
                 Funcao* f = (Funcao*) l->info;
                 //liberarMemoriaFuncao(f);
                 break;
             }
-            case TIPO_LISTA_CHAR:
+            case TIPO_LITERAL:
                 free(l->prox);
                 break;
             default:
@@ -143,6 +136,7 @@ Lista** liberarMemoriaTabelaHash(Lista** tabelaHash) {
                 tabelaHash[i] = liberarMemoriaLista(tabelaHash[i]);
             }
         }
+        free(tabelaHash);
     }
     return NULL;
 }
@@ -235,7 +229,7 @@ Lista** inserirVariavelTabelaHash(Lista** tabelaHash, char* nome, Lista* dimenso
         chave = chave % TAM;
         Lista* lista = (Lista*) malloc(sizeof (Lista));
         lista -> info = (void*) variavel;
-        lista -> tipo = TIPO_LISTA_VARIAVEL;
+        lista -> tipo = TIPO_VARIAVEL;
         lista -> prox = tabelaHash[chave];
         tabelaHash[chave] = lista;
     }
@@ -279,6 +273,13 @@ Lista** inserirListaVariaveisTabelaHash(Lista** tabelaHash, Lista* dimensoesMatr
 }
 
 /**************************MANIPULACAO DE FUNCOES******************************/
+Funcao* criarFuncao(char* nome){
+    Funcao* f = (Funcao*)malloc(sizeof(Funcao));
+    f->nome = (char*)malloc((strlen(nome) + 1) * sizeof(char));
+    strcpy(f->nome, nome);
+    return f;
+}
+
 Lista* buscaFuncao(Lista** l, char nome[], int escopo) {
     int chave = 0, i;
     for (i = 0; i < nome[i] != '\0'; i++) {

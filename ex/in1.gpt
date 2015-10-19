@@ -1,7 +1,7 @@
 algoritmo teste1;
 
 variaveis
-	a, b, c, d, v , f: inteiro;
+	a, f: inteiro;
 	b : real;
 	c : literal;
 	d : logico;

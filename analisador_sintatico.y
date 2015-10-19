@@ -7,13 +7,16 @@
     int tipo;
     Lista** hashVariavel;
     Lista* variaveis;
+    Lista* parametrosFuncao;
     int escopo = 0;
     Lista* dimensoesMatriz;
+    Funcao* funcao;
 
     void finalizarProgramaComErro(char* erro){
         printf("Erro semantico na linha %d. %s.\n", line_num, erro);
         variaveis = liberarMemoriaLista(variaveis);
         dimensoesMatriz = liberarMemoriaLista(dimensoesMatriz);
+        parametrosFuncao = liberarMemoriaLista(parametrosFuncao);
         hashVariavel = liberarMemoriaTabelaHash(hashVariavel);
         exit(0);
 }
@@ -136,16 +139,34 @@ DECLARACAO_VARIAVEL_GERAL
 LISTA_VARIAVEIS
     : LISTA_VARIAVEIS token_simboloVirgula token_identificador{
         Variavel* var = criarNovaVariavel(yytext, NULL, tipo, escopo) ;
-        Lista* l = criarNovoNoLista(TIPO_LISTA_VARIAVEL, var, variaveis);
+        Lista* l = criarNovoNoLista(TIPO_VARIAVEL, var, variaveis);
         variaveis = l;
     } 
     | token_identificador {
         Variavel* var = criarNovaVariavel(yytext, NULL, tipo, escopo) ;
-        Lista* l = criarNovoNoLista(TIPO_LISTA_VARIAVEL, var, variaveis);
+        Lista* l = criarNovoNoLista(TIPO_VARIAVEL, var, variaveis);
         variaveis = l;
     } 
     ;
 
+DECLARACAO_FUNCAO
+    : DECLARACAO_FUNCAO token_funcao token_identificador{
+        funcao = criarFuncao(yytext);
+    } DECLARACAO_FUNCAO_ARGUMENTOS
+
+    | token_funcao token_identificador{
+        funcao = criarFuncao(yytext);
+    } DECLARACAO_FUNCAO_ARGUMENTOS
+    ;
+
+DECLARACAO_FUNCAO_ARGUMENTOS
+    : token_simboloAbreParentese PARAMETRO_DECLARACAO_FUNCAO token_simboloFechaParentese token_simboloDoisPontos TIPO_VARIAVEL_PRIMITIVO ROTINA_FUNCAO token_fimFuncao
+    | token_simboloAbreParentese PARAMETRO_DECLARACAO_FUNCAO token_simboloFechaParentese token_simboloDoisPontos ROTINA_FUNCAO token_fimFuncao
+    | token_simboloAbreParentese token_simboloFechaParentese token_simboloDoisPontos TIPO_VARIAVEL_PRIMITIVO ROTINA_FUNCAO token_fimFuncao
+    | token_simboloAbreParentese token_simboloFechaParentese token_simboloDoisPontos ROTINA_FUNCAO token_fimFuncao
+    ;
+
+/*
 DECLARACAO_FUNCAO
     : DECLARACAO_FUNCAO token_funcao token_identificador token_simboloAbreParentese PARAMETRO_DECLARACAO_FUNCAO token_simboloFechaParentese token_simboloDoisPontos TIPO_VARIAVEL_PRIMITIVO ROTINA_FUNCAO token_fimFuncao
     | DECLARACAO_FUNCAO token_funcao token_identificador token_simboloAbreParentese PARAMETRO_DECLARACAO_FUNCAO token_simboloFechaParentese token_simboloDoisPontos ROTINA_FUNCAO token_fimFuncao
@@ -156,10 +177,22 @@ DECLARACAO_FUNCAO
     | token_funcao token_identificador token_simboloAbreParentese token_simboloFechaParentese token_simboloDoisPontos TIPO_VARIAVEL_PRIMITIVO ROTINA_FUNCAO token_fimFuncao
     | token_funcao token_identificador token_simboloAbreParentese token_simboloFechaParentese token_simboloDoisPontos ROTINA_FUNCAO token_fimFuncao
     ;
-
+*/
 PARAMETRO_DECLARACAO_FUNCAO
-    : PARAMETRO_DECLARACAO_FUNCAO token_simboloVirgula token_identificador token_simboloDoisPontos TIPO_VARIAVEL_PRIMITIVO 
-    | token_identificador token_simboloDoisPontos TIPO_VARIAVEL_PRIMITIVO
+    : PARAMETRO_DECLARACAO_FUNCAO token_simboloVirgula token_identificador{
+        parametrosFuncao = criarNovoNoListaFim(TIPO_LITERAL, yytext, parametrosFuncao);
+    } token_simboloDoisPontos TIPO_VARIAVEL_PRIMITIVO{
+        int tipoMapeado = mapearTipoString(yytext);
+        parametrosFuncao = criarNovoNoListaFim(TIPO_INTEIRO, &tipoMapeado, parametrosFuncao);
+        parametrosFuncao = liberarMemoriaLista(parametrosFuncao);
+    } 
+    | token_identificador{
+        parametrosFuncao = criarNovoNoListaFim(TIPO_LITERAL, yytext, parametrosFuncao);
+    } token_simboloDoisPontos TIPO_VARIAVEL_PRIMITIVO{
+        int tipoMapeado = mapearTipoString(yytext);
+        parametrosFuncao = criarNovoNoListaFim(TIPO_INTEIRO, &tipoMapeado, parametrosFuncao);
+        parametrosFuncao = liberarMemoriaLista(parametrosFuncao);
+    }
     ;
 
 ROTINA_FUNCAO
@@ -201,10 +234,10 @@ MATRIZ
 
 POSICAO_MATRIZ
     : POSICAO_MATRIZ token_simboloAbreColchete token_inteiro {
-            dimensoesMatriz = criarNovoNoListaFim(TIPO_LISTA_CHAR, yytext, dimensoesMatriz);
+            dimensoesMatriz = criarNovoNoListaFim(TIPO_LITERAL, yytext, dimensoesMatriz);
     } token_simboloFechaColchete 
     | token_simboloAbreColchete token_inteiro {
-            dimensoesMatriz = criarNovoNoListaFim(TIPO_LISTA_CHAR, yytext, dimensoesMatriz);
+            dimensoesMatriz = criarNovoNoListaFim(TIPO_LITERAL, yytext, dimensoesMatriz);
     }token_simboloFechaColchete
     ;
 
