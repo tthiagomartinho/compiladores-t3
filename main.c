@@ -13,16 +13,16 @@
  * 
  */
 int main(int argc, char** argv) {
-    Lista** hashVariavel = inicializa_hash();
+    Lista** hashVariavel = inicializarTabelaHash();
     char nome[] = "teste";
     //    Lista** hashFuncao = inicializa_hash();
     
-    hashVariavel = insereVariavel(hashVariavel, nome, 1, 0, 0);
-    if (buscaVariavel(hashVariavel, nome, 0) != NULL) {
+    hashVariavel = inserirVariavelTabelaHash(hashVariavel, nome, 1, 0, 0);
+    if (buscarVariavelTabelaHash(hashVariavel, nome, 0) != NULL) {
         printf("A busca funciona\n");
     } else {
         printf("A busca nao funciona\n");
     }
-    libera(hashVariavel);
+    liberarMemoriaTabelaHash(hashVariavel);
     return (EXIT_SUCCESS);
 }

@@ -3,12 +3,20 @@
 #include "hash.h"
     
     extern int line_num;
-    extern char identificador[2000];
     extern char* yytext;
     int tipo;
     Lista** hashVariavel;
     Lista* variaveis;
-    int escopo = 0;  
+    int escopo = 0;
+    Lista* dimensoesMatriz;
+
+    void finalizarProgramaComErro(char* erro){
+        printf("Erro semantico na linha %d. %s.\n", line_num, erro);
+        variaveis = liberarMemoriaLista(variaveis);
+        dimensoesMatriz = liberarMemoriaLista(dimensoesMatriz);
+        hashVariavel = liberarMemoriaTabelaHash(hashVariavel);
+        exit(0);
+}
 %}
 
 /* TOKENS DEFINICOES BASICAS */
@@ -108,47 +116,32 @@ PROGRAMA
 VARIAVEIS
     : token_variaveis DECLARACAO_VARIAVEL token_fimVariaveis
     ;
-/*
-DECLARACAO_VARIAVEL
-    : token_identificador {
-        Variavel* var = novaVariavel(yytext, NULL, tipo, escopo) ;
-        Lista* l = criaNovoNoLista(var, variaveis);
-        variaveis = l;
-    }  DECLARACAO_VARIAVEL2
-    ;
-    
-    
-DECLARACAO_VARIAVEL2
-    : token_simboloVirgula DECLARACAO_VARIAVEL
-    | token_simboloDoisPontos TIPO_VARIAVEIS { 
-        hashVariavel = insereListaVariaveisHash(hashVariavel, variaveis, tipo, escopo);
-        printf("%d\n", tipo);
-        variaveis = NULL;
-    } token_simboloPontoVirgula DECLARACAO_VARIAVEL
-    | token_simboloDoisPontos TIPO_VARIAVEIS token_simboloPontoVirgula
-    ;
-*/
+
 DECLARACAO_VARIAVEL
     : DECLARACAO_VARIAVEL DECLARACAO_VARIAVEL_GERAL
     | DECLARACAO_VARIAVEL_GERAL
     ;
 
 DECLARACAO_VARIAVEL_GERAL
-    : LISTA_VARIAVEIS token_simboloDoisPontos TIPO_VARIAVEIS{ 
-        hashVariavel = insereListaVariaveisHash(hashVariavel, variaveis, tipo, escopo);
-        variaveis = liberaLista(variaveis);
+    : LISTA_VARIAVEIS token_simboloDoisPontos TIPO_VARIAVEIS { 
+        hashVariavel = inserirListaVariaveisTabelaHash(hashVariavel, dimensoesMatriz, variaveis, tipo, escopo);
+        if(hashVariavel == NULL){
+            finalizarProgramaComErro("Variavel redeclara");
+        }
+        variaveis = liberarMemoriaLista(variaveis);
+	    dimensoesMatriz = liberarMemoriaLista(dimensoesMatriz);
     }  token_simboloPontoVirgula
     ;
 
 LISTA_VARIAVEIS
     : LISTA_VARIAVEIS token_simboloVirgula token_identificador{
-        Variavel* var = novaVariavel(yytext, NULL, tipo, escopo) ;
-        Lista* l = criaNovoNoLista(var, variaveis);
+        Variavel* var = criarNovaVariavel(yytext, NULL, tipo, escopo) ;
+        Lista* l = criarNovoNoLista(TIPO_LISTA_VARIAVEL, var, variaveis);
         variaveis = l;
     } 
     | token_identificador {
-        Variavel* var = novaVariavel(yytext, NULL, tipo, escopo) ;
-        Lista* l = criaNovoNoLista(var, variaveis);
+        Variavel* var = criarNovaVariavel(yytext, NULL, tipo, escopo) ;
+        Lista* l = criarNovoNoLista(TIPO_LISTA_VARIAVEL, var, variaveis);
         variaveis = l;
     } 
     ;
@@ -180,9 +173,7 @@ COMANDO_RETORNO
     ;
 
 TIPO_VARIAVEIS
-    : MATRIZ {
-        tipo = 5;
-    }
+    : MATRIZ
     | TIPO_VARIAVEL_PRIMITIVO
     ;
 
@@ -209,10 +200,12 @@ MATRIZ
     ;
 
 POSICAO_MATRIZ
-    : POSICAO_MATRIZ token_simboloAbreColchete token_identificador token_simboloFechaColchete 
-    | POSICAO_MATRIZ token_simboloAbreColchete token_inteiro token_simboloFechaColchete 
-    | token_simboloAbreColchete token_identificador token_simboloFechaColchete
-    | token_simboloAbreColchete token_inteiro token_simboloFechaColchete
+    : POSICAO_MATRIZ token_simboloAbreColchete token_inteiro {
+            dimensoesMatriz = criarNovoNoListaFim(TIPO_LISTA_CHAR, yytext, dimensoesMatriz);
+    } token_simboloFechaColchete 
+    | token_simboloAbreColchete token_inteiro {
+            dimensoesMatriz = criarNovoNoListaFim(TIPO_LISTA_CHAR, yytext, dimensoesMatriz);
+    }token_simboloFechaColchete
     ;
 
 PROGRAMA_PRINCIPAL
@@ -379,14 +372,14 @@ OPERADORES_ALTA_PRECEDENCIA
 #include "lex.yy.c"
 
 main(){
-    hashVariavel = inicializa_hash();
+    hashVariavel = inicializarTabelaHash();
     variaveis = NULL;
     yyparse();
-    imprimeHash(hashVariavel);
+    imprimirTabelaHash(hashVariavel);
+    hashVariavel = liberarMemoriaTabelaHash(hashVariavel);
 }
 
 /* rotina chamada por yyparse quando encontra erro */
 yyerror (void){
     printf("Erro na Linha: %d\n", line_num);
 }
-

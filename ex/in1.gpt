@@ -5,6 +5,7 @@ variaveis
 	b : real;
 	c : literal;
 	d : logico;
+	oi, teste, aVida : matriz[10][5] de inteiro;
 fim-variaveis
 
 inicio

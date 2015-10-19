@@ -3,7 +3,6 @@
     #include <stdlib.h>
     int line_num = 1;
     int comment_caller;
-    char identificador[2000];
     int tipo;
      
 %}
@@ -172,10 +171,7 @@ SIMBOLO_ESPECIAL "\""|"."|"{"|"}"|"#"|"'"|"\\"
 {SIMBOLO_ESPECIAL}          {return token_simboloEspecial;}
 
  
-{IDENTIFICADOR}             {
-    strcat(identificador, yytext);  
-    strcat(identificador, ",");
-    return token_identificador;}
+{IDENTIFICADOR}             {return token_identificador;}
 
 
 [ \t]                       ; /* sao ignorados */
