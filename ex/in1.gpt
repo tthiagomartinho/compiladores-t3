@@ -1,12 +1,24 @@
 algoritmo teste1;
 
 variaveis
-	a, f: inteiro;
-	b : real;
-	c : literal;
-	d : logico;
-	oi, teste, aVida : matriz[10][5] de inteiro;
+	matinho, matinho1, matinho3 : matriz [10][10] de inteiro;
+	media : inteiro;
+	matinho4, matinho5, matinho6 : matriz [10][10] de inteiro;
+	raizQuadrada : real;
+	teste: logico;
 fim-variaveis
+
+funcao soma(x : inteiro, y : inteiro) : 
+	inicio
+		retorne 1;
+	fim
+fim-funcao
+
+funcao soma(aaaaa : inteiro, bbbbc : logico, kkk : literal) : literal
+	inicio
+		retorne 1;
+	fim
+fim-funcao
 
 inicio
 

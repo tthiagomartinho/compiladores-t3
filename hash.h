@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "util.h"
 
 typedef struct lista Lista;
 typedef struct funcao Funcao;
@@ -31,27 +30,35 @@ Lista* liberarMemoriaLista(Lista* lista);
 /**************************FUNCOES TABELA HASH*********************************/
 Lista** inicializarTabelaHash();
 
-Lista* buscarVariavelTabelaHash(Lista** tabelaHash, char nome[], int escopo);
+Lista* buscarVariavelTabelaHash(Lista** tabelaHash, char nome[], char* escopo);
 
 Lista** liberarMemoriaTabelaHash(Lista** tabelaHash);
 
 /**************************MANIPULACAO DE VARIAVEIS****************************/
 
-Variavel* criarNovaVariavel(char* nome, Lista* dimensoesMatriz, int tipo, int escopo);
+Variavel* criarNovaVariavel(char* nome, Lista* dimensoesMatriz, int tipo, char* escopo);
 
 Variavel* liberarMemoriaVariavel(Variavel* v);
 
 /**************************MANIPULACAO TABELA HASH DE VARIAVEIS*****************/
 
-Lista** inserirVariavelTabelaHash(Lista** tabelaHash, char* nome, Lista* dimensoesMatriz, int tipo, int escopo);
+Lista** inserirVariavelTabelaHash(Lista** tabelaHash, char* nome, Lista* dimensoesMatriz, int tipo, char* escopo);
 
 void imprimirTabelaHash(Lista** tabelaHash);
 
-Lista** inserirListaVariaveisTabelaHash(Lista** tabelaHash, Lista* dimensoesMatriz, Lista* variaveis, int tipo, int escopo);
+Lista** inserirListaVariaveisTabelaHash(Lista** tabelaHash, Lista* dimensoesMatriz, Lista* variaveis, int tipo, char* escopo);
 
 /**************************MANIPULACAO DE FUNCOES******************************/
 Funcao* criarFuncao(char* nome);
 
-Lista* buscaFuncao(Lista** l, char nome[], int escopo);
+Funcao* buscarFuncaoTabelaHash(Lista** tabelaHash, char* nome, int aridade, int retorno, int* tipoParametros);
+
+Lista** inserirFuncaoTabelaHash(Funcao* funcao, Lista* variaveis, int tipo, Lista** tabelaHash);
+
+Funcao* setConfiguracaoParametrosFuncao(Funcao* funcao, Lista* variaveis);
 
 Funcao* liberaFuncao(Funcao* f);
+
+char* getNomeFuncao(Funcao* funcao);
+
+void imprimirTabelaHashFuncao(Lista** tabelaHash);

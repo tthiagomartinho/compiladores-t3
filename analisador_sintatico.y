@@ -5,19 +5,24 @@
     extern int line_num;
     extern char* yytext;
     int tipo;
-    Lista** hashVariavel;
-    Lista* variaveis;
-    Lista* parametrosFuncao;
-    int escopo = 0;
-    Lista* dimensoesMatriz;
-    Funcao* funcao;
+    char escopo[255] = "global";
+    char nomeVariavel[255];
+    Lista** hashVariavel = NULL;
+    Lista** hashFuncao = NULL;
+    Lista* variaveis = NULL;
+    Lista* dimensoesMatriz = NULL;
+    Funcao* funcao = NULL;
+
+    void liberarMemoriaAlocada(){
+        variaveis = liberarMemoriaLista(variaveis);
+        dimensoesMatriz = liberarMemoriaLista(dimensoesMatriz);
+        hashVariavel = liberarMemoriaTabelaHash(hashVariavel);
+        hashFuncao = liberarMemoriaTabelaHash(hashFuncao);
+    }
 
     void finalizarProgramaComErro(char* erro){
         printf("Erro semantico na linha %d. %s.\n", line_num, erro);
-        variaveis = liberarMemoriaLista(variaveis);
-        dimensoesMatriz = liberarMemoriaLista(dimensoesMatriz);
-        parametrosFuncao = liberarMemoriaLista(parametrosFuncao);
-        hashVariavel = liberarMemoriaTabelaHash(hashVariavel);
+        liberarMemoriaAlocada();
         exit(0);
 }
 %}
@@ -132,7 +137,7 @@ DECLARACAO_VARIAVEL_GERAL
             finalizarProgramaComErro("Variavel redeclara");
         }
         variaveis = liberarMemoriaLista(variaveis);
-	    dimensoesMatriz = liberarMemoriaLista(dimensoesMatriz);
+        dimensoesMatriz = liberarMemoriaLista(dimensoesMatriz);
     }  token_simboloPontoVirgula
     ;
 
@@ -141,7 +146,7 @@ LISTA_VARIAVEIS
         Variavel* var = criarNovaVariavel(yytext, NULL, tipo, escopo) ;
         Lista* l = criarNovoNoLista(TIPO_VARIAVEL, var, variaveis);
         variaveis = l;
-    } 
+    }
     | token_identificador {
         Variavel* var = criarNovaVariavel(yytext, NULL, tipo, escopo) ;
         Lista* l = criarNovoNoLista(TIPO_VARIAVEL, var, variaveis);
@@ -152,18 +157,39 @@ LISTA_VARIAVEIS
 DECLARACAO_FUNCAO
     : DECLARACAO_FUNCAO token_funcao token_identificador{
         funcao = criarFuncao(yytext);
+        variaveis = liberarMemoriaLista(variaveis);
     } DECLARACAO_FUNCAO_ARGUMENTOS
 
     | token_funcao token_identificador{
         funcao = criarFuncao(yytext);
+        variaveis = liberarMemoriaLista(variaveis);
     } DECLARACAO_FUNCAO_ARGUMENTOS
     ;
 
 DECLARACAO_FUNCAO_ARGUMENTOS
-    : token_simboloAbreParentese PARAMETRO_DECLARACAO_FUNCAO token_simboloFechaParentese token_simboloDoisPontos TIPO_VARIAVEL_PRIMITIVO ROTINA_FUNCAO token_fimFuncao
-    | token_simboloAbreParentese PARAMETRO_DECLARACAO_FUNCAO token_simboloFechaParentese token_simboloDoisPontos ROTINA_FUNCAO token_fimFuncao
-    | token_simboloAbreParentese token_simboloFechaParentese token_simboloDoisPontos TIPO_VARIAVEL_PRIMITIVO ROTINA_FUNCAO token_fimFuncao
-    | token_simboloAbreParentese token_simboloFechaParentese token_simboloDoisPontos ROTINA_FUNCAO token_fimFuncao
+    : token_simboloAbreParentese PARAMETRO_DECLARACAO_FUNCAO{
+        char* nomeFuncao = getNomeFuncao(funcao);
+        hashVariavel = inserirListaVariaveisTabelaHash(hashVariavel, NULL, variaveis, tipo, nomeFuncao);
+        if(hashVariavel == NULL){
+            finalizarProgramaComErro("Variavel redeclara");
+        }
+    } token_simboloFechaParentese token_simboloDoisPontos DECLARACAO_FUNCAO_ARGUMENTOS2
+    | token_simboloAbreParentese token_simboloFechaParentese token_simboloDoisPontos DECLARACAO_FUNCAO_ARGUMENTOS2
+
+DECLARACAO_FUNCAO_ARGUMENTOS2
+    : TIPO_VARIAVEL_PRIMITIVO{
+        hashFuncao = inserirFuncaoTabelaHash(funcao, variaveis, tipo, hashFuncao);
+        if(hashFuncao == NULL){
+            finalizarProgramaComErro("Funcao ja decladara");
+        }
+        variaveis = liberarMemoriaLista(variaveis);
+    } ROTINA_FUNCAO token_fimFuncao
+    | {
+        hashFuncao = inserirFuncaoTabelaHash(funcao, variaveis, TIPO_VOID, hashFuncao);
+        if(hashFuncao == NULL){
+            finalizarProgramaComErro("Funcao ja decladara");
+        }
+    } ROTINA_FUNCAO token_fimFuncao
     ;
 
 /*
@@ -180,18 +206,20 @@ DECLARACAO_FUNCAO
 */
 PARAMETRO_DECLARACAO_FUNCAO
     : PARAMETRO_DECLARACAO_FUNCAO token_simboloVirgula token_identificador{
-        parametrosFuncao = criarNovoNoListaFim(TIPO_LITERAL, yytext, parametrosFuncao);
+        strcpy(nomeVariavel, yytext);
     } token_simboloDoisPontos TIPO_VARIAVEL_PRIMITIVO{
-        int tipoMapeado = mapearTipoString(yytext);
-        parametrosFuncao = criarNovoNoListaFim(TIPO_INTEIRO, &tipoMapeado, parametrosFuncao);
-        parametrosFuncao = liberarMemoriaLista(parametrosFuncao);
+        char* nomeFuncao = getNomeFuncao(funcao);
+        Variavel* var = criarNovaVariavel(nomeVariavel, NULL, tipo, nomeFuncao) ;
+        Lista* l = criarNovoNoListaFim(TIPO_VARIAVEL, var, variaveis);
+        variaveis = l;
     } 
     | token_identificador{
-        parametrosFuncao = criarNovoNoListaFim(TIPO_LITERAL, yytext, parametrosFuncao);
+        strcpy(nomeVariavel, yytext);
     } token_simboloDoisPontos TIPO_VARIAVEL_PRIMITIVO{
-        int tipoMapeado = mapearTipoString(yytext);
-        parametrosFuncao = criarNovoNoListaFim(TIPO_INTEIRO, &tipoMapeado, parametrosFuncao);
-        parametrosFuncao = liberarMemoriaLista(parametrosFuncao);
+        char* nomeFuncao = getNomeFuncao(funcao);
+        Variavel* var = criarNovaVariavel(nomeVariavel, NULL, tipo, nomeFuncao) ;
+        Lista* l = criarNovoNoListaFim(TIPO_VARIAVEL, var, variaveis);
+        variaveis = l;
     }
     ;
 
@@ -206,25 +234,27 @@ COMANDO_RETORNO
     ;
 
 TIPO_VARIAVEIS
-    : MATRIZ
+    : MATRIZ{
+        tipo = TIPO_MATRIZ;
+    }
     | TIPO_VARIAVEL_PRIMITIVO
     ;
 
 TIPO_VARIAVEL_PRIMITIVO
     : token_tipoReal{
-        tipo = 0;
+        tipo = TIPO_REAL;
     }
     | token_tipoInteiro{
-        tipo = 1;
+        tipo = TIPO_INTEIRO;
     }
     | token_tipoCaractere{
-        tipo = 2;
+        tipo = TIPO_CARACTERE;
     }
     | token_tipoLiteral{
-        tipo = 3;
+        tipo = TIPO_LITERAL;
     }
     | token_tipoLogico {
-        tipo = 4;
+        tipo = TIPO_LOGICO;
     }
     ;
 
@@ -234,10 +264,10 @@ MATRIZ
 
 POSICAO_MATRIZ
     : POSICAO_MATRIZ token_simboloAbreColchete token_inteiro {
-            dimensoesMatriz = criarNovoNoListaFim(TIPO_LITERAL, yytext, dimensoesMatriz);
+        dimensoesMatriz = criarNovoNoListaFim(TIPO_LITERAL, yytext, dimensoesMatriz);
     } token_simboloFechaColchete 
     | token_simboloAbreColchete token_inteiro {
-            dimensoesMatriz = criarNovoNoListaFim(TIPO_LITERAL, yytext, dimensoesMatriz);
+        dimensoesMatriz = criarNovoNoListaFim(TIPO_LITERAL, yytext, dimensoesMatriz);
     }token_simboloFechaColchete
     ;
 
@@ -406,13 +436,17 @@ OPERADORES_ALTA_PRECEDENCIA
 
 main(){
     hashVariavel = inicializarTabelaHash();
+    hashFuncao = inicializarTabelaHash();
     variaveis = NULL;
     yyparse();
-    imprimirTabelaHash(hashVariavel);
-    hashVariavel = liberarMemoriaTabelaHash(hashVariavel);
+    //imprimirTabelaHash(hashVariavel);
+    imprimirTabelaHashFuncao(hashFuncao);
+    liberarMemoriaAlocada();
 }
 
 /* rotina chamada por yyparse quando encontra erro */
 yyerror (void){
-    printf("Erro na Linha: %d\n", line_num);
+    printf("Erro na sintatico na linha %d\n", line_num);
+    liberarMemoriaAlocada();
+    exit(0);
 }

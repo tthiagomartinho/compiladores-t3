@@ -5,19 +5,18 @@
 struct variavel {
     char *nome;
     void *valor;
+    char* escopo;
     int tipo; //real = 0, inteiro = 1, caractere = 2, literal = 3, logico = 4, matriz = 5
-    int escopo; //global=1, local=1
     int usada;
     int dimensaoMatriz;
     int* dimensoes;
 };
 
 struct funcao {
-    char *nome;
+    char* nome;
+    int* tipoParametros; //cada funcao pode ter no maximo 10 parametros
     int retorno; //real = 0, inteiro = 1, caractere = 2, literal = 3, logico = 4, void = -1
     int aridade;
-    int escopo;
-    int tipo_parametros[10]; //cada funcao pode ter no maximo 10 parametros
 };
 
 struct lista {
@@ -89,7 +88,10 @@ Lista* liberarMemoriaLista(Lista* lista) {
                 break;
             }
             case TIPO_LITERAL:
-                free(l->prox);
+                free(l->info);
+                break;
+            case TIPO_MATRIZ:
+                free(l->info);
                 break;
             default:
                 break;
@@ -111,7 +113,7 @@ Lista** inicializarTabelaHash() {
     return v;
 }
 
-Lista* buscarVariavelTabelaHash(Lista** tabelaHash, char nome[], int escopo) {
+Lista* buscarVariavelTabelaHash(Lista** tabelaHash, char nome[], char* escopo) {
     int chave = 0, i;
     for (i = 0; i < nome[i] != '\0'; i++) {
         chave = chave + (int) nome[i];
@@ -121,7 +123,7 @@ Lista* buscarVariavelTabelaHash(Lista** tabelaHash, char nome[], int escopo) {
     chave = chave % TAM;
     for (p = tabelaHash[chave]; p != NULL; p = p->prox) {
         Variavel *v = (Variavel*) p->info;
-        if (strcmp(v->nome, nome) == 0 && v->escopo == escopo) {
+        if (strcmp(v->nome, nome) == 0 && strcmp(v->escopo, escopo) == 0) {
             return p;
         }
     }
@@ -150,10 +152,15 @@ Lista** liberarMemoriaTabelaHash(Lista** tabelaHash) {
  * tipo: inteiro que define qual o tipo da variavel. DE 0 ATÉ 4
  * escopo: escopo da variavel
  */
-Variavel* criarNovaVariavel(char* nome, Lista* dimensoesMatriz, int tipo, int escopo) {
+Variavel* criarNovaVariavel(char* nome, Lista* dimensoesMatriz, int tipo, char* escopo) {
     Variavel* v = (Variavel*) malloc(sizeof (Variavel));
     v -> nome = (char*) malloc((strlen(nome) + 1) * sizeof (char));
     strcpy(v->nome, nome);
+
+    v -> escopo = (char*) malloc((strlen(escopo) + 1) * sizeof (char));
+    strcpy(v->escopo, escopo);
+
+    v -> tipo = tipo;
 
     switch (tipo) {
         case TIPO_REAL:
@@ -163,45 +170,44 @@ Variavel* criarNovaVariavel(char* nome, Lista* dimensoesMatriz, int tipo, int es
             v->valor = (int*) malloc(sizeof (int));
             break;
         case TIPO_LITERAL:
-            v->valor = (char*) malloc(sizeof (char));
+            v->valor = (char**) malloc(sizeof (char*));
             break;
         case TIPO_LOGICO:
             v->valor = (int*) malloc(sizeof (int));
             break;
+        case TIPO_CARACTERE:
+            v->valor = (char*) malloc(sizeof (char));
+            break;
+        case TIPO_MATRIZ:{
+            Lista* l;
+            int i = 0, j;
+            for (l = dimensoesMatriz; l != NULL; l = l -> prox) {
+                i++;
+            }
+            v -> dimensoes = (int*) malloc(i * sizeof (int));
+            v -> dimensaoMatriz = i;
+            l = dimensoesMatriz;
+            int totalEspacoNecessario = 1;
+            for (j = 0; j < i; j++) {
+                char* q = (char*) l->info;
+                l = l->prox;
+                int dimensao = atoi(q);
+                v->dimensoes[j] = dimensao;
+                totalEspacoNecessario = totalEspacoNecessario * dimensao;
+            }
+            v->valor = (int*) malloc(totalEspacoNecessario * sizeof (int));
+            }
         default:
             break;
     }
-
-    if (dimensoesMatriz != NULL) {
-        Lista* l;
-        int i = 0, j;
-        for (l = dimensoesMatriz; l != NULL; l = l -> prox) {
-            i++;
-        }
-        v -> dimensoes = (int*) malloc(i * sizeof (int));
-        v -> dimensaoMatriz = i;
-        l = dimensoesMatriz;
-        int totalEspacoNecessario = 1;
-        for (j = 0; j < i; j++) {
-            char* q = (char*) l->info;
-            l = l->prox;
-            int dimensao = atoi(q);
-            v->dimensoes[j] = dimensao;
-            totalEspacoNecessario = totalEspacoNecessario * dimensao;
-        }
-        v->valor = (int*) malloc(totalEspacoNecessario * sizeof (int));
-    }
-    v -> tipo = tipo;
-    v -> escopo = escopo;
     return v;
 }
 
 Variavel* liberarMemoriaVariavel(Variavel* v) {
     free(v->nome);
-    if (v->valor != NULL) {
-        free(v->valor);
-    }
-    if (v->dimensoes != NULL) {
+    free(v->valor);
+    free(v->escopo);
+    if (v->tipo == TIPO_MATRIZ) {
         free(v->dimensoes);
     }
     free(v);
@@ -217,7 +223,7 @@ Variavel* liberarMemoriaVariavel(Variavel* v) {
  * tipo: inteiro que define qual o tipo da variavel. DE 0 ATÉ 4
  * escopo: escopo da variavel
  */
-Lista** inserirVariavelTabelaHash(Lista** tabelaHash, char* nome, Lista* dimensoesMatriz, int tipo, int escopo) {
+Lista** inserirVariavelTabelaHash(Lista** tabelaHash, char* nome, Lista* dimensoesMatriz, int tipo, char* escopo) {
     if (buscarVariavelTabelaHash(tabelaHash, nome, escopo) != NULL) {
         return NULL;
     } else {
@@ -246,7 +252,7 @@ void imprimirTabelaHash(Lista** tabelaHash) {
                 printf("Nome: %s\n", v-> nome);
                 printf("valor: %p\n", v-> valor);
                 printf("tipo: %d\n", v-> tipo);
-                printf("escopo: %d\n", v-> escopo);
+                printf("escopo: %s\n", v-> escopo);
                 printf("usada: %d\n", v-> usada);
                 int i;
                 printf("Dimensoes: ");
@@ -259,7 +265,7 @@ void imprimirTabelaHash(Lista** tabelaHash) {
     }
 }
 
-Lista** inserirListaVariaveisTabelaHash(Lista** tabelaHash, Lista* dimensoesMatriz, Lista* variaveis, int tipo, int escopo) {
+Lista** inserirListaVariaveisTabelaHash(Lista** tabelaHash, Lista* dimensoesMatriz, Lista* variaveis, int tipo, char* escopo) {
     Lista* l;
     for (l = variaveis; l != NULL; l = l ->prox) {
         Variavel* v = (Variavel*) l->info;
@@ -274,13 +280,14 @@ Lista** inserirListaVariaveisTabelaHash(Lista** tabelaHash, Lista* dimensoesMatr
 
 /**************************MANIPULACAO DE FUNCOES******************************/
 Funcao* criarFuncao(char* nome){
-    Funcao* f = (Funcao*)malloc(sizeof(Funcao));
-    f->nome = (char*)malloc((strlen(nome) + 1) * sizeof(char));
-    strcpy(f->nome, nome);
-    return f;
+    Funcao* funcao = (Funcao*) malloc(sizeof (Funcao));
+    funcao->nome = (char*) malloc((strlen(nome) + 1)* sizeof (char));
+    strcpy(funcao->nome, nome);
+    funcao->tipoParametros = NULL;
+    return funcao;
 }
 
-Lista* buscaFuncao(Lista** l, char nome[], int escopo) {
+Funcao* buscarFuncaoTabelaHash(Lista** tabelaHash, char* nome, int aridade, int retorno, int* tipoParametros) {
     int chave = 0, i;
     for (i = 0; i < nome[i] != '\0'; i++) {
         chave = chave + (int) nome[i];
@@ -288,15 +295,102 @@ Lista* buscaFuncao(Lista** l, char nome[], int escopo) {
 
     Lista* p;
     chave = chave % TAM;
-    for (p = l[chave]; p != NULL; p = p->prox) {
+    int achou = 0;
+    for (p = tabelaHash[chave]; p != NULL; p = p->prox) {
         Funcao *f = (Funcao*) p->info;
-        if (strcmp(f->nome, nome) == 0 && f->escopo == escopo) {
-            return p;
+        if (strcmp(f->nome, nome) == 0 && f->aridade == aridade && f->retorno == retorno){
+            for(i = 0; i < aridade; i++){
+                if(f->tipoParametros[i] == tipoParametros[i]){
+                    achou = 1;
+                }else{
+                    achou = 0;
+                }
+            }
+            if(achou == 1){
+                return f;
+            }
         }
     }
     return NULL;
 }
 
-Funcao* liberaFuncao(Funcao* f) {
+Lista** inserirFuncaoTabelaHash(Funcao* funcao, Lista* variaveis, int tipo, Lista** tabelaHash){
+    if(variaveis != NULL){
+        funcao = setConfiguracaoParametrosFuncao(funcao, variaveis);
+    }
+    funcao->retorno = tipo;
 
+    if (buscarFuncaoTabelaHash(tabelaHash, funcao->nome, funcao->aridade, funcao->retorno, funcao->tipoParametros) != NULL) {
+        return NULL;
+    } else {
+        int chave = 0, i;
+        for (i = 0; i < funcao->nome[i] != '\0'; i++) {
+            chave = chave + (int) funcao->nome[i];
+        }
+        chave = chave % TAM;
+        Lista* lista = (Lista*) malloc(sizeof (Lista));
+        lista -> info = (void*) funcao;
+        lista -> tipo = TIPO_FUNCAO;
+        lista -> prox = tabelaHash[chave];
+        tabelaHash[chave] = lista;
+    }
+    return tabelaHash;
+
+}
+
+Funcao* setConfiguracaoParametrosFuncao(Funcao* funcao, Lista* variaveis){
+    Lista* l;
+    int i = 0;
+    for(l = variaveis; l != NULL; l = l -> prox){
+        i++;
+    }
+    funcao->tipoParametros = (int*)malloc(i*sizeof(int));
+    i = 0;
+    for(l = variaveis; l != NULL; l = l -> prox){
+        Variavel* v = (Variavel*) l->info;
+        funcao->tipoParametros[i] = v->tipo;
+        i++;
+    }
+    funcao->aridade = i;
+    return funcao;
+}
+
+Funcao* liberaFuncao(Funcao* f) {
+    if(f != NULL){
+        free(f->nome);
+        if(f->tipoParametros != NULL){
+            free(f->tipoParametros);
+        }
+        free(f);
+    }
+    return NULL;
+}
+
+char* getNomeFuncao(Funcao* funcao){
+    if(funcao != NULL){
+        return funcao->nome;
+    }else{
+        return NULL;
+    }
+}
+
+void imprimirTabelaHashFuncao(Lista** tabelaHash) {
+    int i;
+    for (i = 0; i < TAM; i++) {
+        if (tabelaHash[i] != NULL) {
+            Lista* l;
+            for (l = tabelaHash[i]; l != NULL; l = l->prox) {
+                Funcao* f = (Funcao*) l->info;
+                printf("Nome: %s\n", f-> nome);
+                printf("Retorno: %d\n", f-> retorno);
+                printf("Aridade: %d\n", f-> aridade);
+                int i;
+                printf("Tipo de Parametro: ");
+                for (i = 0; i < f->aridade; i++) {
+                    printf("%d ", f->tipoParametros[i]);
+                }
+                printf("\n\n");
+            }
+        }
+    }
 }
