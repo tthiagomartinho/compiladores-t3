@@ -30,35 +30,41 @@ Lista* liberarMemoriaLista(Lista* lista);
 /**************************FUNCOES TABELA HASH*********************************/
 Lista** inicializarTabelaHash();
 
-Lista* buscarVariavelTabelaHash(Lista** tabelaHash, char nome[], char* escopo);
-
 Lista** liberarMemoriaTabelaHash(Lista** tabelaHash);
 
 /**************************MANIPULACAO DE VARIAVEIS****************************/
 
-Variavel* criarNovaVariavel(char* nome, Lista* dimensoesMatriz, int tipo, char* escopo);
+Variavel* criarNovaVariavel(char* nome, Lista* dimensoesMatriz, int tipo, char* escopo, int linhaDeclarada);
 
 Variavel* liberarMemoriaVariavel(Variavel* v);
 
+Variavel* buscarVariavelTabelaHash(Lista** tabelaHash, char nome[], char* escopo);
+
+int getTipoVariavel(Variavel* variavel);
+
 /**************************MANIPULACAO TABELA HASH DE VARIAVEIS*****************/
 
-Lista** inserirVariavelTabelaHash(Lista** tabelaHash, char* nome, Lista* dimensoesMatriz, int tipo, char* escopo);
+Lista** inserirVariavelTabelaHash(Lista** tabelaHash, Variavel* v, Lista* dimensoesMatriz, int tipo, char* escopo);
 
 void imprimirTabelaHash(Lista** tabelaHash);
 
 Lista** inserirListaVariaveisTabelaHash(Lista** tabelaHash, Lista* dimensoesMatriz, Lista* variaveis, int tipo, char* escopo);
 
+void imprimirRelatorioVariaveisNaoUtilizadas(Lista** hashVariavel);
+
 /**************************MANIPULACAO DE FUNCOES******************************/
 Funcao* criarFuncao(char* nome);
 
-Funcao* buscarFuncaoTabelaHash(Lista** tabelaHash, char* nome, int aridade, int retorno, int* tipoParametros);
+Funcao* buscarFuncaoTabelaHash(Lista** tabelaHash, char* nome);
 
 Lista** inserirFuncaoTabelaHash(Funcao* funcao, Lista* variaveis, int tipo, Lista** tabelaHash);
 
 Funcao* setConfiguracaoParametrosFuncao(Funcao* funcao, Lista* variaveis);
 
-Funcao* liberaFuncao(Funcao* f);
+Funcao* liberarMemoriaFuncao(Funcao* f);
 
 char* getNomeFuncao(Funcao* funcao);
 
 void imprimirTabelaHashFuncao(Lista** tabelaHash);
+
+void imprimirLista(Lista* l);

@@ -1,25 +1,37 @@
 algoritmo teste1;
 
 variaveis
-	matinho, matinho1, matinho3 : matriz [10][10] de inteiro;
+	martinho, martinho1, martinho3 : matriz [10][10] de inteiro;
 	media : inteiro;
-	matinho4, matinho5, matinho6 : matriz [10][10] de inteiro;
+	martinho4, martinho5, martinho6 : matriz [10][10] de literal;
 	raizQuadrada : real;
 	teste: logico;
 fim-variaveis
 
-funcao soma(x : inteiro, y : inteiro) : 
+funcao soma(x : inteiro, y : logico) : 
+	raizQuadrada : real;
 	inicio
 		retorne 1;
 	fim
 fim-funcao
 
-funcao soma(aaaaa : inteiro, bbbbc : logico, kkk : literal) : literal
+funcao soma2(x : inteiro, y : real, k : inteiro, w : literal) : 
+	raizQuadrada : real;
+	inicio
+		retorne 1;
+	fim
+fim-funcao
+
+funcao soma1(x : inteiro, y : logico) : 
+	raizQuadrada : real;
+	teste: logico;
+	rt : inteiro;
 	inicio
 		retorne 1;
 	fim
 fim-funcao
 
 inicio
+	martinho7[1] = leia();
 
 fim

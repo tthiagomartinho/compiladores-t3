@@ -4,6 +4,7 @@
     int line_num = 1;
     int comment_caller;
     int tipo;
+    char identifcador[255];
      
 %}
 
@@ -171,7 +172,8 @@ SIMBOLO_ESPECIAL "\""|"."|"{"|"}"|"#"|"'"|"\\"
 {SIMBOLO_ESPECIAL}          {return token_simboloEspecial;}
 
  
-{IDENTIFICADOR}             {return token_identificador;}
+{IDENTIFICADOR}             {strcpy(identifcador, yytext);
+                            return token_identificador;}
 
 
 [ \t]                       ; /* sao ignorados */
