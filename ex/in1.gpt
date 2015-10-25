@@ -11,18 +11,18 @@ fim-variaveis
 funcao soma(x : inteiro, y : logico) : 
 	raizQuadrada : real;
 	inicio
-		retorne 1;
+		retorne;
 	fim
 fim-funcao
 
-funcao soma2(x : inteiro, y : real, k : inteiro, w : literal) : 
+funcao soma2(x : inteiro, y : real, k : inteiro, w : literal) :
 	raizQuadrada : real;
 	inicio
-		retorne 1;
+		retorne;
 	fim
 fim-funcao
 
-funcao soma1(x : inteiro, y : logico) : 
+funcao soma1(x : inteiro, y : logico) : inteiro
 	raizQuadrada : real;
 	teste: logico;
 	rt : inteiro;
@@ -32,6 +32,17 @@ funcao soma1(x : inteiro, y : logico) :
 fim-funcao
 
 inicio
-	martinho7[1] = leia();
+	media = (((2 + media) * 2) * media) + 4 + 151 + (((2 + media) * 2) * media) / 8 + 7^2 + 3%4;
+	//media = 2.2 + 3;
+//	martinho[1][9] = soma1(1, media);
+	media++;
+	//raizQuadrada = 2 + 3;
+	//teste[10] = (4 < martinho[10]) e (4 > martinho[1]);
+	teste = (verdadeiro == teste) e (falso <> teste) e (((teste <> falso) e verdadeiro) ou teste);
+	se nao teste == verdadeiro entao
+		media = media + 3;
+	senao
+		media = media + 4;
+	fim-se
 
 fim

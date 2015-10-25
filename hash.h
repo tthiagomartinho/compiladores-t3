@@ -17,7 +17,7 @@ typedef struct variavel Variavel;
 #define TIPO_FUNCAO 7
 
 /**************************FUNCOES BASICAS DE LISTAS***************************/
-Lista* inicializarLista(void);
+Lista* inicializarLista();
 
 /*Cria um novo no no inicio da lista*/
 Lista* criarNovoNoLista(int tipo, void* info, Lista* prox);
@@ -42,6 +42,8 @@ Variavel* buscarVariavelTabelaHash(Lista** tabelaHash, char nome[], char* escopo
 
 int getTipoVariavel(Variavel* variavel);
 
+void setVariavelUsada(Variavel* v);
+
 /**************************MANIPULACAO TABELA HASH DE VARIAVEIS*****************/
 
 Lista** inserirVariavelTabelaHash(Lista** tabelaHash, Variavel* v, Lista* dimensoesMatriz, int tipo, char* escopo);
@@ -65,6 +67,20 @@ Funcao* liberarMemoriaFuncao(Funcao* f);
 
 char* getNomeFuncao(Funcao* funcao);
 
+/**************************MANIPULACAO TABELA HASH DE FUNCOES*************************************/
+
+int getTipoRetornoFuncao(Lista** tabelaHash, Funcao* funcao);
+
+Lista** inserirFuncoesInicias(Lista** hashFuncao);
+
+/**************************RANDOM******************************/
+
 void imprimirTabelaHashFuncao(Lista** tabelaHash);
 
 void imprimirLista(Lista* l);
+
+int operadoresIguais(Lista* l);
+
+int isExpressaoValida(Lista* l, int tipoExpressaoAtribuicao);
+
+int validarAcessoMatriz(Variavel* v, Lista* dimensoesMatriz);
