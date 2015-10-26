@@ -40,7 +40,7 @@
 
     Variavel* validarIdentificadorSairCasoInvalido() {
         Variavel* v = buscarVariavelTabelaHash(hashVariavel, identificador, escopo);
-        if(strcmp(escopo, "global") != 0){
+        if(v == NULL && strcmp(escopo, "global") != 0){
             v = buscarVariavelTabelaHash(hashVariavel, identificador, "global");
         }
         if(v == NULL){
@@ -271,12 +271,17 @@ ROTINA_FUNCAO
 COMANDO_RETORNO
     : token_retorne {
         int tipoRetornoFuncao = getTipoRetornoFuncao(hashFuncao, funcao);
+        if(tipoRetornoFuncao == TIPO_VOID){
+            finalizarProgramaComErro("Comando de retorno nao pode ser void");
+        }
         tipoExpressaoAtribuicao = tipoRetornoFuncao;
-    } EXPRESSAO {validarExpressaoSairCasoInvalido();} token_simboloPontoVirgula
+    } EXPRESSAO {
+        validarExpressaoSairCasoInvalido();
+    } token_simboloPontoVirgula
     | token_retorne {
         int tipoRetornoFuncao = getTipoRetornoFuncao(hashFuncao, funcao);
         if(tipoRetornoFuncao != TIPO_VOID){
-            finalizarProgramaComErro("Comando retorno nao pode ser void");
+            finalizarProgramaComErro("Comando retorno tem que ser void");
         }
     } token_simboloPontoVirgula
     ;
@@ -335,12 +340,8 @@ LISTA_COMANDOS
     | COMANDO_IMPRIMA
     | LISTA_COMANDOS COMANDO_CHAMADA_FUNCAO token_simboloPontoVirgula 
     | COMANDO_CHAMADA_FUNCAO token_simboloPontoVirgula
-    | LISTA_COMANDOS {
-        tipoExpressaoAtribuicao = TIPO_LOGICO;
-    } COMANDO_SE 
-    | {
-        tipoExpressaoAtribuicao = TIPO_LOGICO;
-    } COMANDO_SE
+    | LISTA_COMANDOS COMANDO_SE 
+    | COMANDO_SE
     | LISTA_COMANDOS COMANDO_FACA_ENQUANTO
     | COMANDO_FACA_ENQUANTO
     | LISTA_COMANDOS COMANDO_AVALIE
@@ -422,7 +423,11 @@ COMANDO_PARA2
     ;
 
 COMANDO_SE
-    : token_se EXPRESSAO {validarExpressaoSairCasoInvalido();} token_entao LISTA_COMANDOS COMANDO_SE2
+    : token_se {
+        tipoExpressaoAtribuicao = TIPO_LOGICO;
+    } EXPRESSAO {
+        validarExpressaoSairCasoInvalido();
+    } token_entao LISTA_COMANDOS COMANDO_SE2
     ;
 
 COMANDO_SE2

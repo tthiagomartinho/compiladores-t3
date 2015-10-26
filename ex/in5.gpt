@@ -4,33 +4,35 @@ variaveis
 	x : real;
 	y, z : inteiro;
 	k, i : logico;
-	matinho : matriz [100][100] de inteiro;
+	mat : matriz [100][100] de inteiro;
 	vetinho : matriz [20] de real;
 	lite : literal;
 fim-variaveis
 
 funcao soma():
+	oooo : inteiro;
+	res: inteiro;
 	inicio
 		enquanto x <> 0.0 faca
-			imprima(fatorial(3));
+			oooo = 2 + 3;
 		fim-enquanto
-		res = x + y;
-		retorne res;
+		res = y + y;
+		retorne;
 	fim
 fim-funcao
 
-funcao soma(x : inteiro, y : inteiro):
+funcao soma2(x : inteiro, y : inteiro):
 	res : inteiro;
 	string : literal;
 	k, w, z, r : inteiro;
 
 	inicio
 		res = x + y;
-		retorne res;
+		retorne;
 	fim
 fim-funcao
 
-funcao soma2(x : inteiro, y : inteiro) : inteiro
+funcao soma3(x : inteiro, y : inteiro) : inteiro
 	res : inteiro;
 	string : literal;
 	k, w, z, r : inteiro;
@@ -46,14 +48,15 @@ funcao soma2(x : inteiro, y : inteiro) : inteiro
 	fim
 fim-funcao
 
-funcao soma3() : inteiro
+funcao soma4() : inteiro
+	res : inteiro;
 	inicio
-		para x de 9 ate 8 passo -1 faca
+		para z de 9 ate 8 passo -1 faca
 			se 2 < 3 entao
-				x = 3;
+				x = vetinho[10];
 			fim-se
 		fim-para
-		res = x + y;
+		res = mat[10][5] + y;
 		retorne res;
 	fim
 fim-funcao
@@ -63,7 +66,7 @@ funcao fatorial(z:inteiro) : inteiro
 		se z == 1 entao
 			retorne 1;
 		senao
-			y = fatorial(z - 1);
+			//y = fatorial(z - 1);
 			retorne z * y;
 		fim-se
 	fim
@@ -76,9 +79,9 @@ inicio
 	fatorial(y);
 	z = 12;
 	vetinho[3] = -2.2;
-	matinho[2][2] = 1;
+	mat[2][2] = 1;
 	k = verdadeiro;
-	fatorial(matinho[3][6]);
+	//fatorial(mat[3][6]);
 	i = falso;
 	soma();
 	imprima("doidao");
@@ -88,9 +91,15 @@ inicio
 		x = 43;
 	fim-entao
 	*/
+
+	se (x == 2.6) entao
+		x = 43.0;
+	fim-se
 	se (y > z) entao
 		se (z > 1) entao
-			x = -3.2;
+			x = -3.2 + 3.1;
+			x++;
+			++x;
 		fim-se
 	senao
 		se (z > 1) entao
@@ -103,27 +112,27 @@ inicio
 			fim-se
 		fim-se
 	fim-se
-	enquanto x > 3 faca
+	enquanto x > 3.1 faca
 		fatorial(x);
 		imprima(x);
 	fim-enquanto
 	soma(x,y);
-	enquanto x <> 4 faca
-		x = 2;
+	enquanto y <> 4 faca
+		x = 2.1;
 		z = 2;
 	fim-enquanto
-	enquanto x > 3 faca
-		enquanto x > 4 faca
-			se (x < 1) entao
-				x = 0;
+	enquanto y > 3 faca
+		enquanto x > 4.1 faca
+			se (z < 1) entao
+				z = 0;
 			fim-se
 		fim-enquanto
 	fim-enquanto
-	para x de 1 ate 10 faca
-		fatorial(2);
-		se (x <> 0) entao
-			para x de 0 ate 9 passo 1 faca
-				x = 0;
+	para z de 1 ate 10 faca
+		//fatorial(2);
+		se ((x <> 0.0) e (x >= 3.2)) entao
+			para z de 0 ate 9 passo 1 faca
+				x = 0.0;
 			fim-para
 		fim-se
 	fim-para
@@ -135,13 +144,14 @@ inicio
 				y = 0;
 			fim-se
 		fim-enquanto
-		para x de 2 ate 3 faca
-			x = 3;
+		para z de 2 ate 3 faca
+			z = 3;
 		fim-para
 	fim-para
 	imprima(x);
 	x = leia();
 	se y > 1 entao
-		imprima(fatorial(y + 1));
+		//imprima(fatorial(y + 1));
+		y = 2;
 	fim-se
 fim
