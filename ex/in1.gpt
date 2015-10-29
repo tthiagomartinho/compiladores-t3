@@ -44,5 +44,6 @@ inicio
 	senao
 		media = media + 4;
 	fim-se
+	soma(2, teste);
 
 fim

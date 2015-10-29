@@ -18,18 +18,20 @@
     Lista* dimensoesMatriz = NULL;
     Lista* expressao = NULL;
     Lista* operadores = NULL;
+    Lista* parametrosFuncao = NULL;
     Funcao* funcao = NULL;
     int tipoExpressaoAtribuicao;
     int tipoRetornoFuncao;
 
     void liberarMemoriaAlocada() {
-        variaveis = liberarMemoriaLista(variaveis);
-        dimensoesMatriz = liberarMemoriaLista(dimensoesMatriz);
-        hashVariavel = liberarMemoriaTabelaHash(hashVariavel);
+	hashVariavel = liberarMemoriaTabelaHash(hashVariavel);
         hashFuncao = liberarMemoriaTabelaHash(hashFuncao);
-	    variaveisFuncao = liberarMemoriaLista(variaveisFuncao);
+        variaveis = liberarMemoriaLista(variaveis);
+	variaveisFuncao = liberarMemoriaLista(variaveisFuncao);
+        dimensoesMatriz = liberarMemoriaLista(dimensoesMatriz);
         expressao = liberarMemoriaLista(expressao);
         operadores = liberarMemoriaLista(operadores);
+	parametrosFuncao = liberarMemoriaLista(parametrosFuncao);
     }
 
     void finalizarProgramaComErro(char* erro) {
@@ -466,28 +468,41 @@ COMANDO_IMPRIMA
     ;
 
 PARAMETROS_FUNCAO
-    : PARAMETROS_FUNCAO token_simboloVirgula POSSIVEIS_PARAMETROS
-    | POSSIVEIS_PARAMETROS 
+    : PARAMETROS_FUNCAO token_simboloVirgula POSSIVEIS_PARAMETROS {
+    	parametrosFuncao = criarNovoNoListaFim(tipo, yytext, parametrosFuncao);
+    }
+    | POSSIVEIS_PARAMETROS {
+	parametrosFuncao = criarNovoNoListaFim(tipo, yytext, parametrosFuncao);
+    }
     ;
 
 POSSIVEIS_PARAMETROS
     : token_identificador {
-        validarIdentificadorSairCasoInvalido();
+	Variavel* v = validarIdentificadorSairCasoInvalido();
+	tipo = getTipoVariavel(v);
     }
-    | NUMERO
-    | ACESSO_MATRIZ
-    | LOGICO
-    | CARACTERE_LITERAL 
+    | NUMERO 
+    | ACESSO_MATRIZ 
+    | LOGICO 
+    | CARACTERE_LITERAL
     ;
 
 COMANDO_CHAMADA_FUNCAO
-    : token_identificador token_simboloAbreParentese {
-      //  validarIdentificadorSairCasoInvalido();
-    } COMANDO_CHAMADA_FUNCAO2
+    : token_identificador {
+	funcao = buscarFuncaoTabelaHash(hashFuncao, identificador);
+	if(funcao == NULL) {
+	     finalizarProgramaComErro("A funcao nao foi declarada");
+	}
+    } token_simboloAbreParentese COMANDO_CHAMADA_FUNCAO2 {
+    	if(isChamadaFuncaoValida(funcao, parametrosFuncao) == 0){
+	  //   finalizarProgramaComErro("Parametros passados na chamada de funcao nao condizem com a declaracao");
+	}
+	parametrosFuncao = liberarMemoriaLista(parametrosFuncao);
+    }
     ;
 
 COMANDO_CHAMADA_FUNCAO2
-    : token_simboloFechaParentese
+    : token_simboloFechaParentese 
     | PARAMETROS_FUNCAO token_simboloFechaParentese
     ;
 
@@ -535,27 +550,30 @@ TERMO
 
 
 FATOR
-    : token_identificador{
-		//variavel declarada		
-		Variavel* v = validarIdentificadorSairCasoInvalido();
-		setVariavelUsada(v);
-        int tipoVariavel = getTipoVariavel(v);
-        expressao = criarNovoNoListaFim(tipoVariavel, yytext, expressao);
-	}
+    : token_identificador {
+	//variavel declarada		
+	Variavel* v = validarIdentificadorSairCasoInvalido();
+	setVariavelUsada(v);
+        tipo = getTipoVariavel(v);
+        expressao = criarNovoNoListaFim(tipo, yytext, expressao);
+    }
     | NUMERO
     | ACESSO_MATRIZ
     | LOGICO {
+	tipo = TIPO_LOGICO; 
         expressao = criarNovoNoListaFim(TIPO_LOGICO, NULL, expressao);
     }
-    | CARACTERE_LITERAL 
+    | CARACTERE_LITERAL
     | token_simboloAbreParentese EXPRESSAO token_simboloFechaParentese
     ;
 
 NUMERO
     : INTEIRO {
+	tipo = TIPO_INTEIRO;
         expressao = criarNovoNoListaFim(TIPO_INTEIRO, NULL, expressao);
     }
     | REAL {
+	tipo = TIPO_REAL;
         expressao = criarNovoNoListaFim(TIPO_REAL, NULL, expressao);
     }
     ;
@@ -577,8 +595,12 @@ LOGICO
     ;
 
 CARACTERE_LITERAL
-    : token_literal
-    | token_caractere
+    : token_literal {
+	tipo = TIPO_LITERAL;
+    }
+    | token_caractere {
+	tipo = TIPO_CARACTERE;
+    }
     ;
 
 ACESSO_MATRIZ
@@ -587,8 +609,8 @@ ACESSO_MATRIZ
         Variavel* v = validarIdentificadorSairCasoInvalido();
         validarAcessoMatrizSairCasoInvalido(v);
         setVariavelUsada(v);
-        int tipoVariavel = getTipoVariavel(v);
-        expressao = criarNovoNoListaFim(tipoVariavel, yytext, expressao);
+        tipo = getTipoVariavel(v);
+        expressao = criarNovoNoListaFim(tipo, yytext, expressao);
         dimensoesMatriz = liberarMemoriaLista(dimensoesMatriz);
     }
     ;
@@ -636,8 +658,8 @@ main(){
  //   imprimirTabelaHash(hashVariavel);
  //   printf("\n");
  //   printf("IMPRIMINDO FUNCOES\n");
- //   imprimirTabelaHashFuncao(hashFuncao);
-  //  imprimirRelatorioVariaveisNaoUtilizadas(hashVariavel);
+    imprimirTabelaHashFuncao(hashFuncao);
+//    imprimirRelatorioVariaveisNaoUtilizadas(hashVariavel);
     liberarMemoriaAlocada();
 }
 

@@ -67,6 +67,8 @@ Funcao* liberarMemoriaFuncao(Funcao* f);
 
 char* getNomeFuncao(Funcao* funcao);
 
+int isChamadaFuncaoValida(Funcao* funcao, Lista* parametrosFuncao);
+
 /**************************MANIPULACAO TABELA HASH DE FUNCOES*************************************/
 
 int getTipoRetornoFuncao(Lista** tabelaHash, Funcao* funcao);

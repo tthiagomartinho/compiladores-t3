@@ -6,7 +6,7 @@ struct variavel {
     char *nome;
     void *valor;
     char* escopo;
-    int tipo; //real = 0, inteiro = 1, caractere = 2, literal = 3, logico = 4, matriz = 5
+    int tipo; //real = 0, inteiro = 1, caractere = 2, literal = 3, logico = 4
     int usada;
     int dimensaoMatriz;
     int* dimensoes;
@@ -293,7 +293,7 @@ void imprimirRelatorioVariaveisNaoUtilizadas(Lista** hashVariavel) {
             for (l = hashVariavel[i]; l != NULL; l = l -> prox) {
                 Variavel* v = (Variavel*) l->info;
                 if (v->usada != -1) {
-                    printf("A variavel \"%s\" foi declarada na linha %d mas nao foi utilizada\n.", v->nome, v->usada);
+                    printf("Erro semântico na linha %d. A variavel \"%s\" foi declarada mas nao foi utilizada.\n", v->usada, v->nome);
                 }
             }
         }
@@ -379,6 +379,29 @@ char* getNomeFuncao(Funcao* funcao) {
     } else {
         return NULL;
     }
+}
+
+int isChamadaFuncaoValida(Funcao* funcao, Lista* parametrosFuncao){ 
+    if(funcao->aridade = 0 && parametrosFuncao == NULL){
+	return 1;
+    }
+    int quantidadeParametros = 0;
+    Lista* l;
+    for(l = parametrosFuncao; l != NULL; l = l->prox){
+        quantidadeParametros++;
+    }
+printf("%d \n", funcao->aridade);
+    if(funcao->aridade != quantidadeParametros){
+	return 0;
+    }
+    int i = 0;
+    for(l = parametrosFuncao; l != NULL; l = l->prox){
+        if(l->tipo != funcao->tipoParametros[i]){
+	    return 0;
+	}
+	i++;
+    }
+    return 1;
 }
 
 /*************************************************************/
