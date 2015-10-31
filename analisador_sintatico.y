@@ -48,6 +48,7 @@
         if(v == NULL){
             finalizarProgramaComErro("Variavel nao declarada");
         }
+        setVariavelUsada(v);
         return v;
     }
 
@@ -234,6 +235,7 @@ DECLARACAO_FUNCAO
 DECLARACAO_FUNCAO_ARGUMENTOS
     : token_simboloAbreParentese PARAMETRO_DECLARACAO_FUNCAO token_simboloFechaParentese token_simboloDoisPontos DECLARACAO_FUNCAO_ARGUMENTOS2
     | token_simboloAbreParentese token_simboloFechaParentese token_simboloDoisPontos DECLARACAO_FUNCAO_ARGUMENTOS2
+    ;
 
 DECLARACAO_FUNCAO_ARGUMENTOS2
     : TIPO_VARIAVEL_PRIMITIVO{
@@ -448,6 +450,7 @@ COMANDO_AVALIE
     : token_avalie token_simboloAbreParentese token_identificador {
         Variavel* v = validarIdentificadorSairCasoInvalido();
         int tipoVariavel = getTipoVariavel(v);
+        printf("%d\n", tipoVariavel);
         if(tipoVariavel != TIPO_INTEIRO){
             finalizarProgramaComErro("Nao eh possivel avaliar variaveis cujo tipo nao eh inteiro");
         }
@@ -464,7 +467,7 @@ COMANDO_LEIA
     ;
 
 COMANDO_IMPRIMA
-    : token_imprima token_simboloAbreParentese PARAMETROS_FUNCAO token_simboloFechaParentese token_simboloPontoVirgula
+    : token_imprima token_simboloAbreParentese POSSIVEIS_PARAMETROS token_simboloFechaParentese token_simboloPontoVirgula
     ;
 
 PARAMETROS_FUNCAO
@@ -472,32 +475,35 @@ PARAMETROS_FUNCAO
     	parametrosFuncao = criarNovoNoListaFim(tipo, yytext, parametrosFuncao);
     }
     | POSSIVEIS_PARAMETROS {
-	parametrosFuncao = criarNovoNoListaFim(tipo, yytext, parametrosFuncao);
+	   parametrosFuncao = criarNovoNoListaFim(tipo, yytext, parametrosFuncao);
     }
     ;
 
 POSSIVEIS_PARAMETROS
     : token_identificador {
-	Variavel* v = validarIdentificadorSairCasoInvalido();
-	tipo = getTipoVariavel(v);
+	   Variavel* v = validarIdentificadorSairCasoInvalido();
+	   tipo = getTipoVariavel(v);
     }
     | NUMERO 
     | ACESSO_MATRIZ 
-    | LOGICO 
+    | LOGICO {
+        tipo = TIPO_LOGICO; 
+    }
     | CARACTERE_LITERAL
     ;
 
 COMANDO_CHAMADA_FUNCAO
-    : token_identificador {
-	funcao = buscarFuncaoTabelaHash(hashFuncao, identificador);
-	if(funcao == NULL) {
-	     finalizarProgramaComErro("A funcao nao foi declarada");
-	}
-    } token_simboloAbreParentese COMANDO_CHAMADA_FUNCAO2 {
+    : token_identificador token_simboloAbreParentese {
+        funcao = buscarFuncaoTabelaHash(hashFuncao, identificador);
+        if(funcao == NULL) {
+            finalizarProgramaComErro("A funcao nao foi declarada");
+        }
+        parametrosFuncao = liberarMemoriaLista(parametrosFuncao);
+    } COMANDO_CHAMADA_FUNCAO2 {
     	if(isChamadaFuncaoValida(funcao, parametrosFuncao) == 0){
-	  //   finalizarProgramaComErro("Parametros passados na chamada de funcao nao condizem com a declaracao");
-	}
-	parametrosFuncao = liberarMemoriaLista(parametrosFuncao);
+	       finalizarProgramaComErro("Parametros passados na chamada de funcao nao condizem com a declaracao");
+	   }
+	   parametrosFuncao = liberarMemoriaLista(parametrosFuncao);
     }
     ;
 
@@ -551,16 +557,15 @@ TERMO
 
 FATOR
     : token_identificador {
-	//variavel declarada		
-	Variavel* v = validarIdentificadorSairCasoInvalido();
-	setVariavelUsada(v);
+	   //variavel declarada		
+	   Variavel* v = validarIdentificadorSairCasoInvalido();
         tipo = getTipoVariavel(v);
         expressao = criarNovoNoListaFim(tipo, yytext, expressao);
     }
     | NUMERO
     | ACESSO_MATRIZ
     | LOGICO {
-	tipo = TIPO_LOGICO; 
+	    tipo = TIPO_LOGICO; 
         expressao = criarNovoNoListaFim(TIPO_LOGICO, NULL, expressao);
     }
     | CARACTERE_LITERAL
@@ -608,7 +613,6 @@ ACESSO_MATRIZ
         //variavel declarada 
         Variavel* v = validarIdentificadorSairCasoInvalido();
         validarAcessoMatrizSairCasoInvalido(v);
-        setVariavelUsada(v);
         tipo = getTipoVariavel(v);
         expressao = criarNovoNoListaFim(tipo, yytext, expressao);
         dimensoesMatriz = liberarMemoriaLista(dimensoesMatriz);
@@ -658,8 +662,8 @@ main(){
  //   imprimirTabelaHash(hashVariavel);
  //   printf("\n");
  //   printf("IMPRIMINDO FUNCOES\n");
-    imprimirTabelaHashFuncao(hashFuncao);
-//    imprimirRelatorioVariaveisNaoUtilizadas(hashVariavel);
+//    imprimirTabelaHashFuncao(hashFuncao);
+    imprimirRelatorioVariaveisNaoUtilizadas(hashVariavel);
     liberarMemoriaAlocada();
 }
 

@@ -31,12 +31,19 @@ funcao soma1(x : inteiro, y : logico) : inteiro
 	fim
 fim-funcao
 
+funcao imprimeString(s : literal) :
+	inicio
+		imprima(s);
+		retorne;
+	fim
+fim-funcao
+
 inicio
-	media = (((2 + media) * 2) * media) + 4 + 151 + (((2 + media) * 2) * media) / 8 + 7^2 + 3%4;
+	media = (((2 + media) * 2) * media) + 4 + 151 + (((2 + media) * 2) * media) / 8 + 7^2 + 3%4 + kjkj;
 	//media = 2.2 + 3;
 //	martinho[1][9] = soma1(1, media);
 	media++;
-	//raizQuadrada = 2 + 3;
+	//raizQuadrada = 2 + 3 + kjk;
 	//teste[10] = (4 < martinho[10]) e (4 > martinho[1]);
 	teste = (verdadeiro == teste) e (falso <> teste) e (((teste <> falso) e verdadeiro) ou teste);
 	se nao teste == verdadeiro entao
@@ -44,6 +51,7 @@ inicio
 	senao
 		media = media + 4;
 	fim-se
-	soma(2, teste);
+	soma(2, verdadeiro);
+	imprimeString("a vida");
 
 fim

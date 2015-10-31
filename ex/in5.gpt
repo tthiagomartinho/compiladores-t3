@@ -113,10 +113,10 @@ inicio
 		fim-se
 	fim-se
 	enquanto x > 3.1 faca
-		fatorial(x);
+		fatorial(3);
 		imprima(x);
 	fim-enquanto
-	soma(x,y);
+	soma();
 	enquanto y <> 4 faca
 		x = 2.1;
 		z = 2;
@@ -154,4 +154,23 @@ inicio
 		//imprima(fatorial(y + 1));
 		y = 2;
 	fim-se
+	avalie (y) :
+		caso 1:
+			x = 2.2;
+			pare;
+		caso 2:
+			para y de -4 ate 99 passo 4 faca
+				enquanto y < 98 faca
+					se (y <> 0) entao
+						y = 3;
+					senao
+					y = 0;
+					fim-se
+				fim-enquanto
+				para z de 2 ate 3 faca
+					z = 3;
+				fim-para
+			fim-para
+			pare;
+	fim-avalie
 fim
