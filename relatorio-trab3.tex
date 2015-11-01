@@ -1,0 +1,186 @@
+\documentclass[
+12pt,				% Tamanho da fonte.
+a4paper,			% Tamanho do papel.
+english,			% Idioma adicional para hifenização.
+french,				% Idioma adicional para hifenização.
+spanish,			% Idioma adicional para hifenização.
+brazil,				% O último idioma é o principal do documento.
+article
+]{abntex2}
+
+
+
+%%% Importação de pacotes. %%%
+
+% Codificação do documento em Unicode.
+\usepackage[utf8]{inputenc}
+
+\usepackage[T1]{fontenc}
+
+%opening
+\title{Trabalho 3 Compiladores}
+\author{Rodrigo Pimenta, Thiago Martinho}
+
+\begin{document}
+
+\maketitle
+
+\section{Introdução}
+
+Este trabalho teve como objetivo a construção do analisador semântico do  compilador proposto para a linguagem GPortugol cujo manual pode ser encontrado em (\url{http://www.inf.ufes.br/~mberger/Disciplinas/2015_2/Compiladores/manualGPortugol.pdf}). A base desse trabalho de número três é o analisador léxico e sintático construídos com o auxílio das ferramentas Flex e Bison respectivamente.
+Para o desenvolvimento do analisador semântico, foi utilizado a linguagem de programação C e a ferramenta Bison.
+
+
+\section{Analisador Semântico}
+
+A construção de um analisador semântico é a terceira etapa do processo de codificação de um compilador para uma linguagem qualquer. Este analisador tem por objetivo verificar os erros semânticos contidos no código a ser compilado. 
+
+Nesta etapa de compilação são verificados erros de tipo, de utilização de variáveis não declaradas, de chamadas e declarações de funções, de expressões, entre outros. Para os casos onde não há erro semântico, as variáveis declaradas já podem ser alocadas na memória a fim de diminuir o tempo de execução do programa.  
+
+\section{Tabela de Variáveis e Funções}
+
+Para realizar o controle de variáveis e funções foram criadas duas tabelas hash com um tempo de acesso constante de tamanho fixo de 97 posições. Para cada elemento declarado no programa, foi criado um registro na tabela posicionado de acordo com a função hash utilizada que calcula o resto da divisão entre a soma do equivalente ASCII de cada letra do nome do elemento e o tamanho da tabela. As colisões foram tratadas utilizando lista simplesmente encadeada, sendo que um novo elemento é inserido no começo da lista.
+
+A tabela de variáveis apresenta a seguinte estrutura:
+
+\begin{itemize}
+	\item nome;
+	\item valor;
+	\item escopo;
+	\item tipo;
+	\item se a variável é usada ou não;
+	\item dimensão da matriz;
+	\item tamanho máximo de elementos para cada dimensão da matriz; 
+\end{itemize}
+
+Para os elementos que não são matrizes, os campos que representam as dimensões não são preenchidos;
+
+Já a tabela de funções é contém:
+
+\begin{itemize}
+	\item nome;
+	\item tipo de parâmetros;
+	\item tipo de retorno;
+	\item aridade;
+\end{itemize}
+
+Para simplificação e padronização do programa, foram definidas as seguintes constantes que identificam os tipos primitivos:
+
+\begin{table}[h]
+	\caption{Constantes que identificam os tipos de variáveis primitivos}
+	\label{tbl-divisao-sistema}
+	\centering
+	\begin{tabular}{| p{47mm} | p{100mm} | }\hline		
+		\textbf{Tipo} & 
+		\textbf{Valor}\\
+		\hline
+		TIPO VOID & -1\\
+		\hline
+		TIPO REAL & 0\\
+		\hline
+		TIPO INTEIRO & 1\\
+		\hline
+		TIPO CARACTERE & 2\\
+		\hline
+		TIPO LITERAL & 3\\
+		\hline
+		TIPO LOGICO & 4\\
+		\hline
+	\end{tabular}
+\end{table}
+
+\section{Erros semânticos}
+Nesta seção, estão listados e descritos todos os possíveis erros semânticos na escrita de um programa em GPortugol.
+
+\subsection{Declaração de Variáveis}
+A declaração de variáveis é feita da forma como está presente no manual da linguagem, com exceção da definição do tipo matriz. Neste trabalho, foi considerado que uma matriz é composta de \textit{n} dimensões e de um tipo. Esse tipo, na definição original da ferramenta, deveria ser escrito no plural, porém para nós ele deve ser declarado da mesma forma que uma variável não-matriz, ou seja, no singular.
+
+O bloco de declaração de variáveis é opcional na construção de um programa, entretanto se este bloco for inserido, pelo menos uma variável deverá ser declarada.
+
+
+\subsection{Comandos de Seleção}
+Os comandos de seleção presentes na linguagem são o \textit{se-entao-senao-fim-se} e o \textit{avalie-caso-pare-fim-avalie}.
+O comando \textit{se} pode ser acompanhado ou não de uma cláusula \textit{senao} mas obrigatoriamente deverá ser terminado com \textit{fim-se}. Já o comando \textit{avalie} deverá ter uma expressão a ser avaliada e alguns casos a serem considerados. Esses casos não podem conter expressões lógicas e nem aritméticas, sendo possíveis apenas valores já conhecidos, como inteiros ou lógicos (da mesma forma que na linguagem C) e após o fim de cada bloco de caso, deverá ser inserido o delimitador \textit{pare}.
+
+\subsection{Comandos de Repetição}
+Os comandos de repetição suportados na linguagem são o \textit{enquanto}, o \textit{faca-enquanto} e o \textit{para}. A definição e utilização desses comandos funcionam de acordo com a especificação original da linguagem.
+
+O comando \textit{faca-enquanto} foi inserido na gramática e pode ser utilizado da seguinte forma:
+\textit{faca: BLOCO DE CÓDIGO enquanto (EXPRESSAO A SER AVALIADA) fim-enquanto}.
+
+\subsection{Declaração de Função}
+As declarações de funções seguem de forma similar a definida pelo manual da linguagem, onde vale destacar que não é possível uma função retornar uma matriz.
+
+A única exceção para declarações de funções é relativo a posição delas. As função devem ser declaradas abaixo da declaração de variáveis (quando houver) e acima do bloco principal do programa.
+
+Não é possível declarar funções de nomes \textit{leia} e \textit{imprima} por serem reservadas da linguagem.
+
+Todas as funções devem possuir uma instrução de retorno e estas não podem conter combinações de chamadas de outras funções com expressões lógicas e/ou aritméticas. Para mais detalhes consulte a seção \ref{atribuicoes}.
+
+\subsection{Chamada de Funções}
+As chamadas de funções podem conter expressões, outras funções, variáveis, literais, valores lógicos, inteiros ou reais como parâmetro. Nessa fase de construção do compilador, não é verificado se existe ou não uma função declarada correspondente.
+
+\subsection{Atribuições}
+\label{atribuicoes}
+Nosso analisador sintático verificará tanto operações aritméticas como operações lógicas (ou relacionais). Durante essa fase de avaliação do compilador, expressões que podem não fazer sentido também são aceitas, uma vez que estão escritas na forma correta. O sentido da expressão será avaliado no próximo trabalho (analisador semântico). Não são aceitas operações que incluem chamadas de funções combinadas com expressões aritméticas ou lógicas como por exemplo \textit{x + fatorial(2);} e nem expressões que envolvem os operadores \textit{++} ou \textit{$-$$-$}.
+
+Alguns exemplos de expressões incorretas mas que são aceitas pelo analisador sintático são:
+
+
+\begin{math}
+	\mathit{x = verdadeiro ^ 3;}
+\end{math}
+
+\begin{math}
+	\mathit{x = 10 + verdadeiro;}
+\end{math}
+
+\begin{math}
+	\mathit{x[2] = "exemplo" * 7;}
+\end{math}
+
+
+\section{A gramática}
+Neste seção, está descrito de forma mais formal a gramática construída. O símbolo * indica a ocorrência de zero ou mais vezes de um item, o símbolo + indica a ocorrência de uma ou mais vezes e o símbolo ? indica que o item é opcional.
+A avaliação de uma cadeia de caracteres sempre começa pela regra \textit{ALGORITMO}.
+
+\begin{itemize}
+	\item ALGORITMO : token\char`_algoritmo token\char`_identificador token\char`_simboloPontoVirgula PROGRAMA
+	\item PROGRAMA : (VARIAVEIS)? (DECLARACAO\char`_FUNCAO)? PROGRAMA\char`_PRINCIPAL; 
+	\item VARIAVEIS : token\char`_variaveis DECLARACAO\char`_VARIAVEL token\char`_fimVariaveis
+	\item DECLARACAO\char`_VARIAVEL : token\char`_identificador token\char`_simboloVirgula DECLARACAO\char`_VARIAVEL $+$ | token\char`_identificador token\char`_simboloDoisPontos TIPO\char`_VARIAVEIS token\char`_simboloPontoVirgula (DECLARACAO\char`_VARIAVEL+)?
+	\item DECLARACAO\char`_FUNCAO : (DECLARACAO\char`_FUNCAO+)? token\char`_funcao token\char`_identificador token\char`_simboloAbreParentese (PARAMETRO\char`_DECLARACAO\char`_FUNCAO)? token\char`_simboloFechaParentese token\char`_simboloDoisPontos (TIPO\char`_VARIAVEL\char`_PRIMITIVO)? ROTINA\char`_FUNCAO token\char`_fimFuncao
+	\item PARAMETRO\char`_DECLARACAO\char`_FUNCAO : (PARAMETRO\char`_DECLARACAO\char`_FUNCAO token\char`_simboloVirgula +)?  token\char`_identificador token\char`_simboloDoisPontos TIPO\char`_VARIAVEL\char`_PRIMITIVO
+	\item ROTINA\char`_FUNCAO : (DECLARACAO\char`_VARIAVEL)? token\char`_inicio LISTA\char`_COMANDOS token\char`_fim
+	\item COMANDO\char`_RETORNO : token\char`_retorne (EXPRESSAO)? token\char`_simboloPontoVirgula
+	\item TIPO\char`_VARIAVEIS : MATRIZ | TIPO\char`_VARIAVEL\char`_PRIMITIVO
+	\item TIPO\char`_VARIAVEL\char`_PRIMITIVO : token\char`_tipoReal | token\char`_tipoInteiro | token\char`_tipoCaractere | token\char`_tipoLogico | token\char`_tipoLiteral
+	\item MATRIZ : token\char`_tipoMatriz POSICAO\char`_MATRIZ token\char`_de TIPO\char`_VARIAVEL\char`_PRIMITIVO
+	\item POSICAO\char`_MATRIZ : (POSICAO\char`_MATRIZ+)? token\char`_simboloAbreColchete token\char`_identificador token\char`_simboloFechaColchete | (POSICAO\char`_MATRIZ+)? token\char`_simboloAbreColchete token\char`_inteiro token\char`_simboloFechaColchete
+	\item PROGRAMA\char`_PRINCIPAL : token\char`_inicio (LISTA\char`_COMANDOS+)? token\char`_fim
+	\item LISTA\char`_COMANDOS : (LISTA\char`_COMANDOS+)? COMANDO\char`_ATRIBUICAO token\char`_simboloPontoVirgula | (LISTA\char`_COMANDOS+)? COMANDO\char`_ENQUANTO | (LISTA\char`_COMANDOS+)? COMANDO\char`_PARA | (LISTA\char`_COMANDOS+)? COMANDO\char`_LEIA | (LISTA\char`_COMANDOS+)? COMANDO\char`_IMPRIMA | (LISTA\char`_COMANDOS+)? COMANDO\char`_CHAMADA\char`_FUNCAO token\char`_simboloPontoVirgula | (LISTA\char`_COMANDOS+)? COMANDO\char`_SE | (LISTA\char`_COMANDOS+)? COMANDO\char`_FACA\char`_ENQUANTO | (LISTA\char`_COMANDOS)+? COMANDO\char`_AVALIE | (LISTA\char`_COMANDOS+)? COMANDO\char`_RETORNO | (LISTA\char`_COMANDOS+)? COMANDO\char`_MAIS\char`_MAIS\char`_MENOS\char`_MENOS
+	\item COMANDO\char`_ATRIBUICAO : token\char`_identificador token\char`_operadorAtribuicao VALOR\char`_A\char`_SER\char`_ATRIBUIDO | ACESSO\char`_MATRIZ token\char`_operadorAtribuicao VALOR\char`_A\char`_SER\char`_ATRIBUIDO
+	\item VALOR\char`_A\char`_SER\char`_ATRIBUIDO : (VALOR\char`_A\char`_SER\char`_ATRIBUIDO+)? EXPRESSAO |  (VALOR\char`_A\char`_SER\char`_ATRIBUIDO+)? COMANDO\char`_CHAMADA\char`_FUNCAO
+	\item COMANDO\char`_ENQUANTO : token\char`_enquanto EXPRESSAO token\char`_faca LISTA\char`_COMANDOS token\char`_fimEnquanto
+	\item COMANDO\char`_PARA token\char`_para token\char`_identificador token\char`_de EXPRESSAO (token\char`_passo NUMERO)? token\char`_faca LISTA\char`_COMANDOS token\char`_fimPara
+	\item COMANDO\char`_SE : token\char`_se EXPRESSAO token\char`_entao LISTA\char`_COMANDOS (token\char`_senao LISTA\char`_COMANDOS)? token\char`_fimSe
+	\item COMANDO\char`_FACA\char`_ENQUANTO : token\char`_faca token\char`_simboloDoisPontos LISTA\char`_COMANDOS token\char`_enquanto token\char`_simboloAbreParentese EXPRESSAO token\char`_simboloFechaParentese token\char`_fimEnquanto
+	\item COMANDO\char`_AVALIE : token\char`_avalie token\char`_simboloAbreParentese token\char`_identificador token\char`_simboloFechaParentese token\char`_simboloDoisPontos AVALIE\char`_CASO token\char`_fimAvalie
+	\item AVALIE\char`_CASO: (AVALIE\char`_CASO+)? token\char`_caso token\char`_identificador token\char`_simboloDoisPontos LISTA\char`_COMANDOS token\char`_pare token\char`_simboloPontoVirgula | (AVALIE\char`_CASO+)? token\char`_caso token\char`_inteiro token\char`_simboloDoisPontos LISTA\char`_COMANDOS token\char`_pare token\char`_simboloPontoVirgula
+	\item COMANDO\char`_LEIA : token\char`_identificador token\char`_operadorAtribuicao token\char`_leia token\char`_simboloAbreParentese token\char`_simboloFechaParentese token\char`_simboloPontoVirgula
+	\item COMANDO\char`_IMPRIMA : token\char`_imprima token\char`_simboloAbreParentese PARAMETROS\char`_FUNCAO token\char`_simboloFechaParentese token\char`_simboloPontoVirgula
+	\item PARAMETROS\char`_FUNCAO : (PARAMETROS\char`_FUNCAO token\char`_simboloVirgula+)? EXPRESSAO | (PARAMETROS\char`_FUNCAO token\char`_simboloVirgula+)? COMANDO\char`_CHAMADA\char`_FUNCAO
+	\item COMANDO\char`_CHAMADA\char`_FUNCAO : token\char`_identificador token\char`_simboloAbreParentese (PARAMETROS\char`_FUNCAO)? token\char`_simboloFechaParentese
+	\item COMANDO\char`_MAIS\char`_MAIS\char`_MENOS\char`_MENOS : token\char`_identificador token\char`_operadorSomaSoma token\char`_simboloPontoVirgula |  token\char`_operadorSomaSoma token\char`_identificador token\char`_simboloPontoVirgula | token\char`_identificador token\char`_operadorSubtraiSubtrai token\char`_simboloPontoVirgula | token\char`_operadorSubtraiSubtrai token\char`_identificador token\char`_simboloPontoVirgula
+	\item EXPRESSAO : EXPRESSAO\char`_SIMPLES | EXPRESSAO\char`_SIMPLES OPERADORES\char`_RELACIONAIS EXPRESSAO\char`_SIMPLES
+	\item EXPRESSAO\char`_SIMPLES : TERMO | EXPRESSAO\char`_SIMPLES OPERADORES\char`_BAIXA\char`_PRECEDENCIA TERMO
+	\item TERMO : FATOR | TERMO OPERADORES\char`_ALTA\char`_PRECEDENCIA FATOR
+	\item FATOR : token\char`_identificador | token\char`_operadorNao FATOR | NUMERO | ACESSO\char`_MATRIZ | token\char`_verdadeiro | token\char`_falso | token\char`_literal | token\char`_caractere | token\char`_simboloAbreParentese EXPRESSAO token\char`_simboloFechaParentese
+	\item NUMERO : token\char`_inteiro | token\char`_inteiroNegativo | token\char`_real | token\char`_realNegativo
+	\item ACESSO\char`_MATRIZ : token\char`_identificador POSICAO\char`_MATRIZ
+	\item OPERADORES\char`_RELACIONAIS : token\char`_operadorIgualIgual | token\char`_operadorMenor | token\char`_operadorMenorIgual | toen\char`_operadorMaiorIgual | token\char`_operadorMaior | token\char`_operadorDiferente
+	\item OPERADORES\char`_BAIXA\char`_PRECEDENCIA : token\char`_operadorMais | token\char`_operadorMenos | token\char`_operadorOU
+	\item OPERADORES\char`_ALTA\char`_PRECEDENCIA : token\char`_operadorVezes | token\char`_operadorDividir | token\char`_operadorPorcento| token\char`_operadorPotencia | token\char`_operadorE
+\end{itemize}
+
+\end{document}
