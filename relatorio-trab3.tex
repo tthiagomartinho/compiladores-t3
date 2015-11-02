@@ -55,7 +55,7 @@ A tabela de variáveis apresenta a seguinte estrutura:
 
 Para os elementos que não são matrizes, os campos que representam as dimensões não são preenchidos;
 
-Já a tabela de funções é contém:
+Já a tabela de funções contém:
 
 \begin{itemize}
 	\item nome;
@@ -92,95 +92,48 @@ Para simplificação e padronização do programa, foram definidas as seguintes 
 \section{Erros semânticos}
 Nesta seção, estão listados e descritos todos os possíveis erros semânticos na escrita de um programa em GPortugol.
 
-\subsection{Declaração de Variáveis}
-A declaração de variáveis é feita da forma como está presente no manual da linguagem, com exceção da definição do tipo matriz. Neste trabalho, foi considerado que uma matriz é composta de \textit{n} dimensões e de um tipo. Esse tipo, na definição original da ferramenta, deveria ser escrito no plural, porém para nós ele deve ser declarado da mesma forma que uma variável não-matriz, ou seja, no singular.
+\subsection{Variável redeclarada}
+Uma mesma variável não pode ser redeclarada num mesmo escopo, logo quando isso ocorrer nosso programa informará qual a linha que uma variável foi redeclarada.
 
-O bloco de declaração de variáveis é opcional na construção de um programa, entretanto se este bloco for inserido, pelo menos uma variável deverá ser declarada.
+\subsection{Expressão}
+Uma expressão é composta por operadores aritméticos ou operadores lógicos, não sendo possível uma mesma expressão conter os dois tipos. Caso, na expressão, exista elementos de tipos diferentes, uma mensagem de erro é exibida e o programa abortado.
 
+\subsection{Matrizes}
+Caso o usuário tente acessar uma posição de uma variável que não seja do tipo matriz, uma mensagem de erro é exibida e o programa abortado. A mesma coisa ocorre, caso uma posição inválida da matriz tente se acessada.
 
-\subsection{Comandos de Seleção}
-Os comandos de seleção presentes na linguagem são o \textit{se-entao-senao-fim-se} e o \textit{avalie-caso-pare-fim-avalie}.
-O comando \textit{se} pode ser acompanhado ou não de uma cláusula \textit{senao} mas obrigatoriamente deverá ser terminado com \textit{fim-se}. Já o comando \textit{avalie} deverá ter uma expressão a ser avaliada e alguns casos a serem considerados. Esses casos não podem conter expressões lógicas e nem aritméticas, sendo possíveis apenas valores já conhecidos, como inteiros ou lógicos (da mesma forma que na linguagem C) e após o fim de cada bloco de caso, deverá ser inserido o delimitador \textit{pare}.
+\subsection{Operadores incremento e decremento}
+Apenas variáveis do tipo inteiro ou real podem estar associadas aos comandos ++ ou \textit{$-$$-$}.
 
-\subsection{Comandos de Repetição}
-Os comandos de repetição suportados na linguagem são o \textit{enquanto}, o \textit{faca-enquanto} e o \textit{para}. A definição e utilização desses comandos funcionam de acordo com a especificação original da linguagem.
+\subsection{Função redeclarada}
+Duas funções não podem ter o mesmo nome, se este caso existir nosso programa tratará isso como erro e informará a linha de tal redeclaração.
 
-O comando \textit{faca-enquanto} foi inserido na gramática e pode ser utilizado da seguinte forma:
-\textit{faca: BLOCO DE CÓDIGO enquanto (EXPRESSAO A SER AVALIADA) fim-enquanto}.
+\subsection{Retorno de função}
+Para os retornos de função ou elas retornam o tipo \textit{void} ou elas retornam um outro tipo qualquer. Uma função do tipo \textit{inteiro} só poderá ter como retorno um variável desse tipo, caso contrário será identificado um erro no comando retorno. Da mesma forma, se uma função não possuir um tipo e tiver como retorno uma variável do tipo \textit{inteiro} nosso programa informará um erro.
 
-\subsection{Declaração de Função}
-As declarações de funções seguem de forma similar a definida pelo manual da linguagem, onde vale destacar que não é possível uma função retornar uma matriz.
+\subsection{Chamada de função}
+Quando declaramos uma função informamos qual o tipo de retorno dela, qual seu nome e quais são os parâmetros que estamos esperando. Quando chamamos uma função devemos prestar atenção em duas coisas, a primeira delas é se a função existe, ou seja, não podemos chamar a função \textit{dobrar} se a mesma não tiver sido declarada anteriormente no programa. Em segundo lugar se a função espera dois parâmetros e passarmos somente um, ou se a função espera valores do tipo \textit{inteiro} e passarmos valores do tipo \textit{logico} nossa chamada de função estará incorreta. Nosso programa deverá identificar esses dois erros e informar ao usuário a linha na qual esse erros ocorreram, especificando qual tipo de erro ocorreu (" Função não declarada " ou " parâmetros passados na chamada de função não condizem com a declaração ").
 
-A única exceção para declarações de funções é relativo a posição delas. As função devem ser declaradas abaixo da declaração de variáveis (quando houver) e acima do bloco principal do programa.
+\subsection{Atribuição de tipos diferentes}
+Uma variável do tipo \textit{inteiro} não pode receber o valor \textit{verdadeiro}, por exemplo, da mesma forma que uma variável do tipo \textit{logico} não pode receber um número ou algo do tipo. Logo quando houver esse tipo de erro nosso programa o identificará e mostrará a linha que esse erro ocorre.
 
-Não é possível declarar funções de nomes \textit{leia} e \textit{imprima} por serem reservadas da linguagem.
+\subsection{Comando \textit{Para}}
+O comando \textit{para} possui a restrição de que a variável auxiliar de iteração deve ser do tipo \textit{inteiro}, logo qualquer tipo diferente disso devemos interromper o programa e informar um erro.
 
-Todas as funções devem possuir uma instrução de retorno e estas não podem conter combinações de chamadas de outras funções com expressões lógicas e/ou aritméticas. Para mais detalhes consulte a seção \ref{atribuicoes}.
+\subsection{Comando \textit{Avalie}}
+O comando \textit{Avalie} deve ser utilizado somente para variáveis do tipo \textit{inteiro}, logo qualquer variável que não seja desse tipo devemos informar um erro.
 
-\subsection{Chamada de Funções}
-As chamadas de funções podem conter expressões, outras funções, variáveis, literais, valores lógicos, inteiros ou reais como parâmetro. Nessa fase de construção do compilador, não é verificado se existe ou não uma função declarada correspondente.
-
-\subsection{Atribuições}
-\label{atribuicoes}
-Nosso analisador sintático verificará tanto operações aritméticas como operações lógicas (ou relacionais). Durante essa fase de avaliação do compilador, expressões que podem não fazer sentido também são aceitas, uma vez que estão escritas na forma correta. O sentido da expressão será avaliado no próximo trabalho (analisador semântico). Não são aceitas operações que incluem chamadas de funções combinadas com expressões aritméticas ou lógicas como por exemplo \textit{x + fatorial(2);} e nem expressões que envolvem os operadores \textit{++} ou \textit{$-$$-$}.
-
-Alguns exemplos de expressões incorretas mas que são aceitas pelo analisador sintático são:
-
-
-\begin{math}
-	\mathit{x = verdadeiro ^ 3;}
-\end{math}
-
-\begin{math}
-	\mathit{x = 10 + verdadeiro;}
-\end{math}
-
-\begin{math}
-	\mathit{x[2] = "exemplo" * 7;}
-\end{math}
-
-
-\section{A gramática}
-Neste seção, está descrito de forma mais formal a gramática construída. O símbolo * indica a ocorrência de zero ou mais vezes de um item, o símbolo + indica a ocorrência de uma ou mais vezes e o símbolo ? indica que o item é opcional.
-A avaliação de uma cadeia de caracteres sempre começa pela regra \textit{ALGORITMO}.
+\section{Considerações em relação a gramática da linguagem}
+Em relação ao analisador sintático desenvolvido no trabalho passado, a gramática do nosso compilador teve algumas alterações, sendo importante destacar:
 
 \begin{itemize}
-	\item ALGORITMO : token\char`_algoritmo token\char`_identificador token\char`_simboloPontoVirgula PROGRAMA
-	\item PROGRAMA : (VARIAVEIS)? (DECLARACAO\char`_FUNCAO)? PROGRAMA\char`_PRINCIPAL; 
-	\item VARIAVEIS : token\char`_variaveis DECLARACAO\char`_VARIAVEL token\char`_fimVariaveis
-	\item DECLARACAO\char`_VARIAVEL : token\char`_identificador token\char`_simboloVirgula DECLARACAO\char`_VARIAVEL $+$ | token\char`_identificador token\char`_simboloDoisPontos TIPO\char`_VARIAVEIS token\char`_simboloPontoVirgula (DECLARACAO\char`_VARIAVEL+)?
-	\item DECLARACAO\char`_FUNCAO : (DECLARACAO\char`_FUNCAO+)? token\char`_funcao token\char`_identificador token\char`_simboloAbreParentese (PARAMETRO\char`_DECLARACAO\char`_FUNCAO)? token\char`_simboloFechaParentese token\char`_simboloDoisPontos (TIPO\char`_VARIAVEL\char`_PRIMITIVO)? ROTINA\char`_FUNCAO token\char`_fimFuncao
-	\item PARAMETRO\char`_DECLARACAO\char`_FUNCAO : (PARAMETRO\char`_DECLARACAO\char`_FUNCAO token\char`_simboloVirgula +)?  token\char`_identificador token\char`_simboloDoisPontos TIPO\char`_VARIAVEL\char`_PRIMITIVO
-	\item ROTINA\char`_FUNCAO : (DECLARACAO\char`_VARIAVEL)? token\char`_inicio LISTA\char`_COMANDOS token\char`_fim
-	\item COMANDO\char`_RETORNO : token\char`_retorne (EXPRESSAO)? token\char`_simboloPontoVirgula
-	\item TIPO\char`_VARIAVEIS : MATRIZ | TIPO\char`_VARIAVEL\char`_PRIMITIVO
-	\item TIPO\char`_VARIAVEL\char`_PRIMITIVO : token\char`_tipoReal | token\char`_tipoInteiro | token\char`_tipoCaractere | token\char`_tipoLogico | token\char`_tipoLiteral
-	\item MATRIZ : token\char`_tipoMatriz POSICAO\char`_MATRIZ token\char`_de TIPO\char`_VARIAVEL\char`_PRIMITIVO
-	\item POSICAO\char`_MATRIZ : (POSICAO\char`_MATRIZ+)? token\char`_simboloAbreColchete token\char`_identificador token\char`_simboloFechaColchete | (POSICAO\char`_MATRIZ+)? token\char`_simboloAbreColchete token\char`_inteiro token\char`_simboloFechaColchete
-	\item PROGRAMA\char`_PRINCIPAL : token\char`_inicio (LISTA\char`_COMANDOS+)? token\char`_fim
-	\item LISTA\char`_COMANDOS : (LISTA\char`_COMANDOS+)? COMANDO\char`_ATRIBUICAO token\char`_simboloPontoVirgula | (LISTA\char`_COMANDOS+)? COMANDO\char`_ENQUANTO | (LISTA\char`_COMANDOS+)? COMANDO\char`_PARA | (LISTA\char`_COMANDOS+)? COMANDO\char`_LEIA | (LISTA\char`_COMANDOS+)? COMANDO\char`_IMPRIMA | (LISTA\char`_COMANDOS+)? COMANDO\char`_CHAMADA\char`_FUNCAO token\char`_simboloPontoVirgula | (LISTA\char`_COMANDOS+)? COMANDO\char`_SE | (LISTA\char`_COMANDOS+)? COMANDO\char`_FACA\char`_ENQUANTO | (LISTA\char`_COMANDOS)+? COMANDO\char`_AVALIE | (LISTA\char`_COMANDOS+)? COMANDO\char`_RETORNO | (LISTA\char`_COMANDOS+)? COMANDO\char`_MAIS\char`_MAIS\char`_MENOS\char`_MENOS
-	\item COMANDO\char`_ATRIBUICAO : token\char`_identificador token\char`_operadorAtribuicao VALOR\char`_A\char`_SER\char`_ATRIBUIDO | ACESSO\char`_MATRIZ token\char`_operadorAtribuicao VALOR\char`_A\char`_SER\char`_ATRIBUIDO
-	\item VALOR\char`_A\char`_SER\char`_ATRIBUIDO : (VALOR\char`_A\char`_SER\char`_ATRIBUIDO+)? EXPRESSAO |  (VALOR\char`_A\char`_SER\char`_ATRIBUIDO+)? COMANDO\char`_CHAMADA\char`_FUNCAO
-	\item COMANDO\char`_ENQUANTO : token\char`_enquanto EXPRESSAO token\char`_faca LISTA\char`_COMANDOS token\char`_fimEnquanto
-	\item COMANDO\char`_PARA token\char`_para token\char`_identificador token\char`_de EXPRESSAO (token\char`_passo NUMERO)? token\char`_faca LISTA\char`_COMANDOS token\char`_fimPara
-	\item COMANDO\char`_SE : token\char`_se EXPRESSAO token\char`_entao LISTA\char`_COMANDOS (token\char`_senao LISTA\char`_COMANDOS)? token\char`_fimSe
-	\item COMANDO\char`_FACA\char`_ENQUANTO : token\char`_faca token\char`_simboloDoisPontos LISTA\char`_COMANDOS token\char`_enquanto token\char`_simboloAbreParentese EXPRESSAO token\char`_simboloFechaParentese token\char`_fimEnquanto
-	\item COMANDO\char`_AVALIE : token\char`_avalie token\char`_simboloAbreParentese token\char`_identificador token\char`_simboloFechaParentese token\char`_simboloDoisPontos AVALIE\char`_CASO token\char`_fimAvalie
-	\item AVALIE\char`_CASO: (AVALIE\char`_CASO+)? token\char`_caso token\char`_identificador token\char`_simboloDoisPontos LISTA\char`_COMANDOS token\char`_pare token\char`_simboloPontoVirgula | (AVALIE\char`_CASO+)? token\char`_caso token\char`_inteiro token\char`_simboloDoisPontos LISTA\char`_COMANDOS token\char`_pare token\char`_simboloPontoVirgula
-	\item COMANDO\char`_LEIA : token\char`_identificador token\char`_operadorAtribuicao token\char`_leia token\char`_simboloAbreParentese token\char`_simboloFechaParentese token\char`_simboloPontoVirgula
-	\item COMANDO\char`_IMPRIMA : token\char`_imprima token\char`_simboloAbreParentese PARAMETROS\char`_FUNCAO token\char`_simboloFechaParentese token\char`_simboloPontoVirgula
-	\item PARAMETROS\char`_FUNCAO : (PARAMETROS\char`_FUNCAO token\char`_simboloVirgula+)? EXPRESSAO | (PARAMETROS\char`_FUNCAO token\char`_simboloVirgula+)? COMANDO\char`_CHAMADA\char`_FUNCAO
-	\item COMANDO\char`_CHAMADA\char`_FUNCAO : token\char`_identificador token\char`_simboloAbreParentese (PARAMETROS\char`_FUNCAO)? token\char`_simboloFechaParentese
-	\item COMANDO\char`_MAIS\char`_MAIS\char`_MENOS\char`_MENOS : token\char`_identificador token\char`_operadorSomaSoma token\char`_simboloPontoVirgula |  token\char`_operadorSomaSoma token\char`_identificador token\char`_simboloPontoVirgula | token\char`_identificador token\char`_operadorSubtraiSubtrai token\char`_simboloPontoVirgula | token\char`_operadorSubtraiSubtrai token\char`_identificador token\char`_simboloPontoVirgula
-	\item EXPRESSAO : EXPRESSAO\char`_SIMPLES | EXPRESSAO\char`_SIMPLES OPERADORES\char`_RELACIONAIS EXPRESSAO\char`_SIMPLES
-	\item EXPRESSAO\char`_SIMPLES : TERMO | EXPRESSAO\char`_SIMPLES OPERADORES\char`_BAIXA\char`_PRECEDENCIA TERMO
-	\item TERMO : FATOR | TERMO OPERADORES\char`_ALTA\char`_PRECEDENCIA FATOR
-	\item FATOR : token\char`_identificador | token\char`_operadorNao FATOR | NUMERO | ACESSO\char`_MATRIZ | token\char`_verdadeiro | token\char`_falso | token\char`_literal | token\char`_caractere | token\char`_simboloAbreParentese EXPRESSAO token\char`_simboloFechaParentese
-	\item NUMERO : token\char`_inteiro | token\char`_inteiroNegativo | token\char`_real | token\char`_realNegativo
-	\item ACESSO\char`_MATRIZ : token\char`_identificador POSICAO\char`_MATRIZ
-	\item OPERADORES\char`_RELACIONAIS : token\char`_operadorIgualIgual | token\char`_operadorMenor | token\char`_operadorMenorIgual | toen\char`_operadorMaiorIgual | token\char`_operadorMaior | token\char`_operadorDiferente
-	\item OPERADORES\char`_BAIXA\char`_PRECEDENCIA : token\char`_operadorMais | token\char`_operadorMenos | token\char`_operadorOU
-	\item OPERADORES\char`_ALTA\char`_PRECEDENCIA : token\char`_operadorVezes | token\char`_operadorDividir | token\char`_operadorPorcento| token\char`_operadorPotencia | token\char`_operadorE
+	\item Não é possível fazer várias chamadas de funções em cadeia. Exemplo: \textit{imprima(fatorial(leia())))};
+	\item Não é possível ter chamadas de funções contendo expressões. Exemplo: \textit{fatorial(x-1)};
+	\item O comando \textit{faca - enquanto} não mais requer parenteses na expressão a ser avaliada. O item passa a ser opcional;
+	\item O comando imprima pode ter apenas um parâmetro;
+	\item Não é possível acessar uma matriz utilizando identificadores. Apenas números inteiros podem ser utilizados como índices;
+	\item Comando \textit{leia()} tem que ser utilizado junto com o comando atribuição;
+	\item No comando \textit{AVALIE - CASO} só números inteiros podem ser utilizados como índices;
 \end{itemize}
+
 
 \end{document}

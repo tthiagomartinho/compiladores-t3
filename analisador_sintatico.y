@@ -276,7 +276,7 @@ COMANDO_RETORNO
     : token_retorne {
         int tipoRetornoFuncao = getTipoRetornoFuncao(hashFuncao, funcao);
         if(tipoRetornoFuncao == TIPO_VOID){
-            finalizarProgramaComErro("Comando de retorno nao pode ser void");
+            finalizarProgramaComErro("Comando de retorno deve ser void");
         }
         tipoExpressaoAtribuicao = tipoRetornoFuncao;
     } EXPRESSAO {
@@ -285,7 +285,7 @@ COMANDO_RETORNO
     | token_retorne {
         int tipoRetornoFuncao = getTipoRetornoFuncao(hashFuncao, funcao);
         if(tipoRetornoFuncao != TIPO_VOID){
-            finalizarProgramaComErro("Comando retorno tem que ser void");
+            finalizarProgramaComErro("Comando retorno tem que ser diferente de void");
         }
     } token_simboloPontoVirgula
     ;
@@ -394,8 +394,18 @@ VALOR_A_SER_ATRIBUIDO
         }
         expressao = liberarMemoriaLista(expressao);
     }
-    | VALOR_A_SER_ATRIBUIDO COMANDO_CHAMADA_FUNCAO
-    | COMANDO_CHAMADA_FUNCAO
+    | VALOR_A_SER_ATRIBUIDO COMANDO_CHAMADA_FUNCAO {
+		int tipoRetornoFuncao = getTipoRetornoFuncao(hashFuncao, funcao);
+		if(tipoRetornoFuncao != tipoExpressaoAtribuicao){
+			finalizarProgramaComErro("Tipo invalido associado a variavel");
+		}
+	}
+    | COMANDO_CHAMADA_FUNCAO {
+		int tipoRetornoFuncao = getTipoRetornoFuncao(hashFuncao, funcao);
+		if(tipoRetornoFuncao != tipoExpressaoAtribuicao){
+			finalizarProgramaComErro("Tipo invalido associado a variavel");
+		}
+	}
     ;
 
 COMANDO_ENQUANTO
@@ -656,13 +666,13 @@ main(){
     hashVariavel = inicializarTabelaHash();
     hashFuncao = inicializarTabelaHash();
     variaveis = NULL;
-    yyparse();
     hashFuncao = inserirFuncoesInicias(hashFuncao);
+    yyparse();
  //   printf("IMPRIMINDO VARIAVEIS\n");
  //   imprimirTabelaHash(hashVariavel);
  //   printf("\n");
  //   printf("IMPRIMINDO FUNCOES\n");
-//    imprimirTabelaHashFuncao(hashFuncao);
+   // imprimirTabelaHashFuncao(hashFuncao);
     imprimirRelatorioVariaveisNaoUtilizadas(hashVariavel);
     liberarMemoriaAlocada();
 }

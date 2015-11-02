@@ -431,6 +431,26 @@ Lista** inserirFuncoesInicias(Lista** hashFuncao){
 
     variaveis = liberarMemoriaLista(variaveis);
 
+    Variavel* v4 = criarNovaVariavel("", NULL, TIPO_REAL, "", 0);
+    variaveis = criarNovoNoListaFim(TIPO_VARIAVEL, v4, variaveis);
+
+    Variavel* v5 = criarNovaVariavel("", NULL, TIPO_REAL, "", 0);
+    variaveis = criarNovoNoListaFim(TIPO_VARIAVEL, v5, variaveis);
+
+    Funcao* maximoReal = criarFuncao("maximoReal");
+    hashFuncao = inserirFuncaoTabelaHash(maximoReal, variaveis, TIPO_REAL, hashFuncao);
+
+    Funcao* minimoReal = criarFuncao("minimoReal");
+    hashFuncao = inserirFuncaoTabelaHash(minimoReal, variaveis, TIPO_REAL, hashFuncao);
+
+    Variavel* v6 = criarNovaVariavel("", NULL, TIPO_REAL, "", 0);
+    variaveis = criarNovoNoListaFim(TIPO_VARIAVEL, v6, variaveis);
+
+    Funcao* centralReal = criarFuncao("centralReal");
+    hashFuncao = inserirFuncaoTabelaHash(centralReal, variaveis, TIPO_REAL, hashFuncao);
+
+    variaveis = liberarMemoriaLista(variaveis);
+
 
     return hashFuncao;
 }
